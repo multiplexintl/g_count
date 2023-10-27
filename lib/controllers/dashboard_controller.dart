@@ -17,19 +17,19 @@ import '../repositories/dashboard_repo.dart';
 class DashBoardController extends GetxController {
   Timer? timer;
 
-  // @override
-  // void onInit() async {
-  //   await createDashboard().then((value) {
-  //     if (countSetting.countId != null && countSetting.stat != "Completed") {
-  //       timer = Timer.periodic(const Duration(minutes: 5), (Timer t) {
-  //         synchronousSyncFunction();
-  //       });
-  //     }
-  //   });
-  //   // await createDashboard();
-  //   log(timer!.isActive.toString());
-  //   super.onInit();
-  // }
+  @override
+  void onInit() async {
+    await createDashboard().then((value) {
+      if (countSetting.countId != null && countSetting.stat != "Completed") {
+        timer = Timer.periodic(const Duration(minutes: 5), (Timer t) {
+          synchronousSyncFunction();
+        });
+      }
+    });
+    // await createDashboard();
+    log(timer!.isActive.toString());
+    super.onInit();
+  }
 
   var dashBoard = DashBoard().obs;
   CountSetting countSetting = CountSetting();

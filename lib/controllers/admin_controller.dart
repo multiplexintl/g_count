@@ -193,6 +193,23 @@ class AdminController extends GetxController {
     }
   }
 
+  Future<int> dropAndCreate() async {
+    try {
+      await DBHelper.executeRawQuery(
+          "DROP TABLE IF EXISTS ${DBHelper.tempCountTable}");
+      DBHelper.executeRawQuery("""CREATE TABLE ${DBHelper.tempCountTable}(
+      ${DBHelper.slNoTempCount} INTEGER PRIMARY KEY AUTOINCREMENT,
+      ${DBHelper.partCodeTempCount} TEXT NOT NULL,
+      ${DBHelper.barcodeTempCount} TEXT NOT NULL,
+      ${DBHelper.qtyTempCount} TEXT NOT NULL,
+      ${DBHelper.rackNoTempCount} TEXT NOT NULL,
+      ${DBHelper.userCodeTempCount} TEXT NOT NULL)""");
+    } catch (e) {
+      return -1;
+    }
+    return 1;
+  }
+
   // delete all database and bock back button too
 
   Future<void> deleteDatabase() async {
@@ -200,11 +217,12 @@ class AdminController extends GetxController {
     var result = await Future.wait([
       DBHelper.deleteAllItem(tableName: DBHelper.countSettingsTable),
       DBHelper.deleteAllItem(tableName: DBHelper.partTable),
-      DBHelper.deleteAllItem(tableName: DBHelper.phyDetailTable),
       DBHelper.deleteAllItem(tableName: DBHelper.rackTable),
-      DBHelper.deleteAllItem(tableName: DBHelper.tempCountTable),
+      //DBHelper.deleteAllItem(tableName: DBHelper.tempCountTable),
+      dropAndCreate(),
       DBHelper.deleteAllItem(tableName: DBHelper.tempCountBackTable),
       DBHelper.deleteAllItem(tableName: DBHelper.tempCountDeleteTable),
+      DBHelper.deleteAllItem(tableName: DBHelper.phyDetailTable),
       DBHelper.deleteAllItem(tableName: DBHelper.usersTable),
       DBHelper.deleteAllItem(tableName: DBHelper.countUserTable),
     ]);

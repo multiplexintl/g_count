@@ -591,7 +591,7 @@ class LastItemWidget extends StatelessWidget {
       // color: Colors.amber,
       // height: 40,
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 15),
       child: Wrap(
         children: [
           Text(

@@ -473,6 +473,13 @@ class DBHelper {
     return columnNames;
   }
 
+  // execute raw query
+
+  static Future<void> executeRawQuery(String query) async {
+    final database = await db;
+    await database.execute(query);
+  }
+
   // close database
   static Future<void> closeDb() async {
     final database = await db;

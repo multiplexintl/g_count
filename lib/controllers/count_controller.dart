@@ -184,6 +184,12 @@ class CountController extends GetxController {
     log(result.toString());
     await getItems();
     rackNumber = rackNumberController.value.text;
+    textEditingController.clear();
+    individualtextEditingController.clear();
+    individualQtytextEditingController.clear();
+    byCodeQtytextEditingController.clear();
+    selectedBrand = null;
+    selectedItem = null;
     Get.toNamed(RouteLinks.counting, arguments: Get.arguments);
   }
 

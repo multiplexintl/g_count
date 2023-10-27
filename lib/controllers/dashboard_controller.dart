@@ -22,12 +22,11 @@ class DashBoardController extends GetxController {
     await createDashboard().then((value) {
       if (countSetting.countId != null && countSetting.stat != "Completed") {
         timer = Timer.periodic(const Duration(minutes: 5), (Timer t) {
-          synchronousSyncFunction();
+          log(t.tick.toString());
+          //synchronousSyncFunction();
         });
       }
     });
-    // await createDashboard();
-    log(timer!.isActive.toString());
     super.onInit();
   }
 

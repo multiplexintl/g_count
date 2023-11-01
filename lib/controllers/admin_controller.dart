@@ -273,6 +273,16 @@ class AdminController extends GetxController {
     }
   }
 
+  Future<bool> checkTempCountAndFinalizeCount() async {
+    var result =
+        await DBHelper.getTableLength(tableName: DBHelper.tempCountTable);
+    if (result <= 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   void exportCount() async {
     log("auto sync called");
     String formattedDate = DateFormat("yyyy-MM-dd").format(DateTime.now());

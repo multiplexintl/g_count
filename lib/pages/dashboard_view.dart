@@ -106,13 +106,22 @@ class DashBoardPage extends StatelessWidget {
             SizedBox(
               height: 50,
               width: 200,
-              child: ElevatedButton(
-                onPressed: () {
-                  con.sync();
-                  // con.countQty();
-                },
-                child: const Text("Sync"),
-              ),
+              child: Obx(() => ElevatedButton(
+                    onPressed: con.isSyncing.value
+                        ? () {}
+                        : () {
+                            con.sync();
+                          },
+                    child: con.isSyncing.value
+                        ? const SizedBox(
+                            height: 25,
+                            width: 25,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text("Sync"),
+                  )),
             )
           ],
         ),

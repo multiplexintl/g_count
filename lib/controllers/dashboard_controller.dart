@@ -17,6 +17,8 @@ import '../repositories/dashboard_repo.dart';
 class DashBoardController extends GetxController {
   Timer? timer;
 
+  var isSyncing = false.obs;
+
   @override
   void onInit() async {
     await createDashboard().then((value) {
@@ -121,6 +123,7 @@ class DashBoardController extends GetxController {
   }
 
   Future<void> sync() async {
+    isSyncing.value = true;
     log("sync called");
     String formattedDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
     var finalQuery =
@@ -158,6 +161,8 @@ class DashBoardController extends GetxController {
       DashboardRepo().uploadTempCountBack(tempCountToUpload)
     ]);
     if (finalResults.every((element) => true)) {
+      // get updated count
+      await getUpdatedQty();
       Get.snackbar(
         "Updated",
         "Items updated to server",
@@ -167,8 +172,7 @@ class DashBoardController extends GetxController {
         duration: const Duration(seconds: 6),
       );
     }
-    // get updated count
-    await getUpdatedQty();
+    isSyncing.value = false;
   }
 
   void synchronousSyncFunction() async {

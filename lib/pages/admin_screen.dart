@@ -91,22 +91,34 @@ class AdminPage extends StatelessWidget {
                 asset: "assets/icons/finalize_count.png",
                 title: "Finalize\nCount",
                 onTap: () {
-                  if (con.countSetting.countId != null) {
-                    log(con.countSetting.toString());
-                    CustomWidgets.displayTextInputDialog(
-                        formKey: formKey,
-                        otp: con.countSetting.finalOtp!,
-                        content:
-                            "Are you sure you want to finalize count?\nThis is NOT REVERSIBLE!!!",
-                        onPressedOk: () async {
-                          if (formKey.currentState!.validate()) {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                            Get.back();
-                            CustomWidgets.startLoading(context);
-                            con.finalizeCount();
-                          }
-                        });
-                  } else {}
+                  con.checkTempCountAndFinalizeCount().then((value) {
+                    if (value) {
+                      if (con.countSetting.countId != null) {
+                        log(con.countSetting.toString());
+                        CustomWidgets.displayTextInputDialog(
+                            formKey: formKey,
+                            otp: con.countSetting.finalOtp!,
+                            content:
+                                "Are you sure you want to finalize count?\nThis is NOT REVERSIBLE!!!",
+                            onPressedOk: () async {
+                              if (formKey.currentState!.validate()) {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                Get.back();
+                                CustomWidgets.startLoading(context);
+                                con.checkTempCountAndFinalizeCount();
+                              }
+                            });
+                      }
+                    } else {
+                      CustomWidgets.stopLoader();
+                      CustomWidgets.customSnackBar(
+                        title: "Failed",
+                        message:
+                            "There are items in temp count. Update temp count first",
+                        textColor: Colors.red,
+                      );
+                    }
+                  });
                 },
               ),
               // Obx(() => Center(child: Text("${con.addingItem}")))

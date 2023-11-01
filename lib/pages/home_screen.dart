@@ -5,6 +5,7 @@ import 'package:g_count/controllers/admin_controller.dart';
 import 'package:g_count/controllers/count_controller.dart';
 import 'package:g_count/controllers/dashboard_controller.dart';
 import 'package:g_count/controllers/items_controller.dart';
+import 'package:g_count/controllers/report_controller.dart';
 
 import 'package:g_count/routes.dart';
 import 'package:g_count/widgets/custom_widgets.dart';
@@ -22,6 +23,7 @@ class HomePage extends StatelessWidget {
     var countCon = Get.put(CountController());
     Get.put(ItemsController());
     var adminCon = Get.find<AdminController>();
+    Get.put(ReportController());
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
     return Scaffold(
       appBar: CustomWidgets.customAppBar("gCount"),

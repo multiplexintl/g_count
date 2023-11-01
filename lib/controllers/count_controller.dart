@@ -193,20 +193,22 @@ class CountController extends GetxController {
 
   Future<void> createRackUser() async {
     var data = countUser.toJson();
+    await DBHelper.deleteAllItem(tableName: DBHelper.countUserTable);
     var result = await DBHelper.insertItem(
         tableName: DBHelper.countUserTable, data: data);
-    log(result.toString());
-    await getItems();
-    rackNumber = rackNumberController.value.text;
-    textEditingController.clear();
-    individualtextEditingController.value.clear();
-    individualQtytextEditingController.clear();
-    byCodeQtytextEditingController.clear();
-    // selectedBrand = null;
-    selectedItem = null;
-    lastItem = null;
-    log(itemFromSearch.toString());
-    Get.offNamed(RouteLinks.counting);
+    if (result > 0) {
+      await getItems();
+      rackNumber = rackNumberController.value.text;
+      textEditingController.clear();
+      individualtextEditingController.value.clear();
+      individualQtytextEditingController.clear();
+      byCodeQtytextEditingController.clear();
+      selectedItem = null;
+      lastItem = null;
+      Get.toNamed(RouteLinks.counting);
+    } else{
+      
+    }
   }
 
   void onSelectBrand({required String brand}) {

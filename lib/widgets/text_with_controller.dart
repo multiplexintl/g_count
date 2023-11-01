@@ -29,6 +29,9 @@ class InputWithKeyboardControl extends EditableText {
   /// showButton is responsible for showing or not the button to control the keyboard, default value is true
   final bool showButton;
 
+  //
+  final TextInputType? textInputType;
+
   InputWithKeyboardControl({
     super.key,
     required TextEditingController controller,
@@ -46,6 +49,7 @@ class InputWithKeyboardControl extends EditableText {
     this.underlineColor = Colors.black,
     this.showUnderline = true,
     this.showButton = true,
+    this.textInputType = TextInputType.number,
   }) : super(
           controller: controller,
           focusNode: focusNode,
@@ -56,19 +60,22 @@ class InputWithKeyboardControl extends EditableText {
           backgroundCursorColor: Colors.black,
           onSubmitted: onSubmitted,
           onChanged: onChanged,
+          keyboardType: textInputType,
         );
 
   @override
   EditableTextState createState() {
     return InputWithKeyboardControlState(
-        startShowKeyboard,
-        focusNode,
-        width,
-        buttonColorEnabled,
-        buttonColorDisabled,
-        underlineColor,
-        showUnderline,
-        showButton);
+      startShowKeyboard,
+      focusNode,
+      width,
+      buttonColorEnabled,
+      buttonColorDisabled,
+      underlineColor,
+      showUnderline,
+      showButton,
+      textInputType!,
+    );
   }
 }
 
@@ -100,6 +107,9 @@ class InputWithKeyboardControlState extends EditableTextState {
   // funcionListener is responsible for controller focusNode listener
   late Function funcionListener;
 
+  //
+  final TextInputType textInputType;
+
   @override
   void initState() {
     funcionListener = () {
@@ -124,7 +134,8 @@ class InputWithKeyboardControlState extends EditableTextState {
       this.buttonColorDisabled,
       this.underlineColor,
       this.showUnderline,
-      this.showButton);
+      this.showButton,
+      this.textInputType);
 
   toggleShowKeyboard(bool value) {
     setState(() {

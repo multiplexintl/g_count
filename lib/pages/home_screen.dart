@@ -80,7 +80,7 @@ class HomePage extends StatelessWidget {
                 asset: "assets/icons/settings.png",
                 title: "Settings",
                 onTap: () async {
-                  countCon.soundAndVibrate(error: true);
+                  // countCon.soundAndVibrate(error: true);
                 },
               ),
               HomeWidget(

@@ -14,6 +14,7 @@ class CountPage extends StatelessWidget {
     return Scaffold(
       appBar: CustomWidgets.customAppBar("Count", back: true),
       bottomNavigationBar: const BottomBarWidget(),
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: const EdgeInsets.only(left: 14, right: 14, top: 20),
         child: Container(

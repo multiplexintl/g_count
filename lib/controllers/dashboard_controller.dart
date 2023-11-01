@@ -23,7 +23,7 @@ class DashBoardController extends GetxController {
       if (countSetting.countId != null && countSetting.stat != "Completed") {
         timer = Timer.periodic(const Duration(minutes: 5), (Timer t) {
           log(t.tick.toString());
-          synchronousSyncFunction();
+          // synchronousSyncFunction();
         });
       }
     });
@@ -85,6 +85,7 @@ class DashBoardController extends GetxController {
       getUpdatedQty();
       dashBoard.value.totalQty = partLength;
       log(dashBoard.toString());
+      update();
     } catch (e) {
       log(e.toString());
     }

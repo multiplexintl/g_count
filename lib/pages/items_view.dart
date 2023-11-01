@@ -12,6 +12,8 @@ class ItemsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var con = Get.find<ItemsController>();
+    TextEditingController searchController = TextEditingController();
+    GlobalKey<FormState> formKey = GlobalKey<FormState>();
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
@@ -163,7 +165,15 @@ class ItemsView extends StatelessWidget {
                           backgroundColor: Colors.greenAccent,
                           fixedSize: const Size(100, 48)),
                       onPressed: () {
-                        con.gotoCount();
+                        CustomWidgets.customDialogue(
+                          title: "Are you sure?",
+                          subTitle:
+                              "You have selected ${con.selectedItem.value.barcode} | ${con.selectedItem.value.itemName} | ${con.selectedItem.value.brand}",
+                          onPressed: () {
+                            Get.back();
+                            con.gotoCount();
+                          },
+                        );
                       },
                       child: const Icon(
                         Icons.forward,
@@ -177,30 +187,63 @@ class ItemsView extends StatelessWidget {
               GetBuilder<ItemsController>(
                 builder: (con) {
                   return CommonTableWdiget(
-                    items: con.selectedItems,
+                    items: con.viewItems,
                     con: con,
                   );
                 },
               ),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: TextFormField(
-                      decoration: CustomWidgets().dropDownInputDecoration(),
+                    child: Form(
+                      key: formKey,
+                      child: SizedBox(
+                        height: 36,
+                        child: TextFormField(
+                          controller: searchController,
+                          validator: (value) {
+                            return value == null || value.isEmpty ? "" : null;
+                          },
+                          onEditingComplete: () {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            if (formKey.currentState!.validate()) {
+                              con.search(searchController.text);
+                            }
+                          },
+                          decoration: CustomWidgets()
+                              .dropDownInputDecoration()
+                              .copyWith(
+                                  contentPadding: const EdgeInsets.all(10),
+                                  errorStyle: const TextStyle(
+                                    height: 0,
+                                  )),
+                        ),
+                      ),
                     ),
                   ),
                   CustomWidgets.gap(w: 15),
                   SizedBox(
                       height: 36,
                       width: 80,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                            backgroundColor: Colors.greenAccent,
-                            fixedSize: const Size(100, 36)),
-                        onPressed: () {
-                          con.gotoCount();
+                      child: GetBuilder<ItemsController>(
+                        builder: (con) {
+                          return OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                                backgroundColor: Colors.greenAccent,
+                                fixedSize: const Size(100, 36)),
+                            onPressed: con.selectedItems.isEmpty
+                                ? null
+                                : () async {
+                                    FocusManager.instance.primaryFocus
+                                        ?.unfocus();
+                                    if (formKey.currentState!.validate()) {
+                                      con.search(searchController.text);
+                                    }
+                                  },
+                            child: const Text("Search"),
+                          );
                         },
-                        child: const Text("Search"),
                       )),
                 ],
               ),
@@ -269,7 +312,7 @@ class CommonTableWdiget extends StatelessWidget {
                         alignment: Alignment.centerLeft,
                         padding: const EdgeInsets.only(left: 5),
                         child: Text(
-                          "Barcode\nDescription",
+                          "Barcode | Item Code\nDescription",
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: Colors.white,
@@ -291,7 +334,7 @@ class CommonTableWdiget extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.only(top: 3),
                           child: Container(
-                            height: 50,
+                            // height: 50,
                             decoration: BoxDecoration(
                                 color: index.isEven
                                     ? Colors.grey.withOpacity(0.3)
@@ -325,11 +368,11 @@ class CommonTableWdiget extends StatelessWidget {
                                             .bodyMedium)),
                                 Expanded(
                                   child: Container(
-                                    height: 60,
+                                    // height: 60,
                                     alignment: Alignment.centerLeft,
                                     padding: const EdgeInsets.only(left: 5),
                                     child: Text(
-                                        "${item.barcode!}\n${item.itemName}",
+                                        "${item.barcode!} | ${item.itemCode!}\n${item.itemName}",
                                         overflow: TextOverflow.visible,
                                         style: Theme.of(context)
                                             .textTheme

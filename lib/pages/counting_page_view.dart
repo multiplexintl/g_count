@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:buttons_tabbar/buttons_tabbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 
 import 'package:g_count/controllers/count_controller.dart';
 import 'package:g_count/helpers/app_config.dart';
@@ -17,18 +18,18 @@ class CountingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     //  int selectedIndex = -1;
     var countCon = Get.put(CountController());
-    InputWithKeyboardControlFocusNode barcodeFocusNode =
-        InputWithKeyboardControlFocusNode();
+    // InputWithKeyboardControlFocusNode barcodeFocusNode =
+    //     InputWithKeyboardControlFocusNode();
+    FocusNode barcodeFocusNode = FocusNode();
     InputWithKeyboardControlFocusNode continuesBarcodeFocusNode =
         InputWithKeyboardControlFocusNode();
-    InputWithKeyboardControlFocusNode byCodeBarcodeFocusNode =
-        InputWithKeyboardControlFocusNode();
+    FocusNode byCodeQtyFocusNode = FocusNode();
 
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: WillPopScope(
         onWillPop: () async {
-          return countCon.goBack();
+          return true;
         },
         child: Scaffold(
           appBar: CustomWidgets.customAppBar("Start Counting", back: true),
@@ -52,7 +53,7 @@ class CountingPage extends StatelessWidget {
             padding: const EdgeInsets.only(left: 14, right: 14, top: 5),
             child: DefaultTabController(
               length: 3,
-              initialIndex: Get.arguments != null ? 1 : 0,
+              initialIndex: countCon.itemFromSearch != null ? 1 : 0,
               child: Column(
                 children: [
                   ButtonsTabBar(
@@ -62,6 +63,9 @@ class CountingPage extends StatelessWidget {
                       }
                       if (p0 == 1) {
                         barcodeFocusNode.requestFocus();
+                      }
+                      if (p0 == 2) {
+                        FocusManager.instance.primaryFocus?.unfocus();
                       }
                     },
                     physics: const NeverScrollableScrollPhysics(),
@@ -105,7 +109,7 @@ class CountingPage extends StatelessWidget {
                       ),
                       ByCodeWidget(
                         con: countCon,
-                        barcodeFocusNode: byCodeBarcodeFocusNode,
+                        qtyFocusNode: byCodeQtyFocusNode,
                       )
                     ],
                   ))
@@ -121,15 +125,16 @@ class CountingPage extends StatelessWidget {
 
 class ByCodeWidget extends StatelessWidget {
   final CountController con;
-  final InputWithKeyboardControlFocusNode barcodeFocusNode;
+  final FocusNode qtyFocusNode;
   const ByCodeWidget({
     super.key,
     required this.con,
-    required this.barcodeFocusNode,
+    required this.qtyFocusNode,
   });
 
   @override
   Widget build(BuildContext context) {
+    // FocusNode byCodeBarcodeFocusnode = FocusNode();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -153,7 +158,6 @@ class ByCodeWidget extends StatelessWidget {
                     children: [
                       Expanded(
                         child: DropDownWithTitleWidget(
-                          // items: con.brands,
                           items: con.brands.map((String? item) {
                             return DropdownMenuItem(
                               value: item,
@@ -164,6 +168,7 @@ class ByCodeWidget extends StatelessWidget {
                           dropdownvalue: con.selectedBrand,
                           onChanged: (value) {
                             con.onSelectBrand(brand: value!);
+                            //byCodeBarcodeFocusnode.requestFocus();
                           },
                         ),
                       ),
@@ -177,7 +182,7 @@ class ByCodeWidget extends StatelessWidget {
                             child: TextFormField(
                               controller: con.byCodeQtytextEditingController,
                               keyboardType: TextInputType.number,
-                              focusNode: barcodeFocusNode,
+                              focusNode: qtyFocusNode,
                               onFieldSubmitted: (value) {
                                 con.onByCodeSave();
                               },
@@ -192,26 +197,40 @@ class ByCodeWidget extends StatelessWidget {
                 ),
                 Expanded(
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Expanded(
-                        child: GetBuilder<CountController>(
-                          builder: (_) {
-                            return DropDownWithTitleWidget(
-                                // items: con.itemCodes,
-                                items: con.itemCodes.map((Item? item) {
-                                  return DropdownMenuItem(
-                                    value: item,
-                                    child: Text(item!.itemCode!),
-                                  );
-                                }).toList(),
-                                title: "Item Code",
-                                dropdownvalue: con.selectedItem,
-                                onChanged: (value) {
-                                  con.onSelectItem(item: value);
-                                  barcodeFocusNode.requestFocus();
-                                });
-                          },
+                        child: Obx(
+                          () => TypeAheadField(
+                            textFieldConfiguration: TextFieldConfiguration(
+                              controller: con.byCodetextEditingController.value,
+                              // focusNode: byCodeBarcodeFocusnode,
+                              // autofocus: true,
+                              style: DefaultTextStyle.of(context).style,
+                              decoration:
+                                  CustomWidgets().dropDownInputDecoration(),
+                            ),
+                            suggestionsCallback: (pattern) {
+                              return con.getSuggestions(pattern);
+                            },
+                            itemBuilder: (context, suggestion) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(suggestion!.itemCode!),
+                              );
+                            },
+                            itemSeparatorBuilder: (context, index) =>
+                                const Divider(height: 1),
+                            onSuggestionSelected: (suggestion) {
+                              con.onSelectItem(item: suggestion!);
+                              qtyFocusNode.requestFocus();
+                            },
+                            suggestionsBoxDecoration: SuggestionsBoxDecoration(
+                              borderRadius: BorderRadius.circular(6.0),
+                              elevation: 8.0,
+                              color: Theme.of(context).cardColor,
+                            ),
+                          ),
                         ),
                       ),
                       CustomWidgets.gap(w: 10),
@@ -220,6 +239,7 @@ class ByCodeWidget extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () {
                             con.onByCodeSave();
+                            FocusManager.instance.primaryFocus?.unfocus();
                           },
                           child: Text(
                             "Save",
@@ -230,85 +250,86 @@ class ByCodeWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                Obx(() => Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        SizedBox(
-                          height: 35,
-                          width: 50,
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: con.adding.value
-                                  ? Colors.red
-                                  : Colors.transparent,
-                              foregroundColor: con.adding.value
-                                  ? Colors.white
-                                  : Colors.black,
-                            ),
-                            onPressed: () {
-                              con.addingRemoving(true);
-                            },
-                            child: const Icon(
-                              Icons.add,
-                              size: 20,
-                            ),
+                CustomWidgets.gap(h: 5),
+                Obx(
+                  () => Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      SizedBox(
+                        height: 35,
+                        width: 50,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: con.adding.value
+                                ? Colors.red
+                                : Colors.transparent,
+                            foregroundColor:
+                                con.adding.value ? Colors.white : Colors.black,
+                          ),
+                          onPressed: () {
+                            con.addingRemoving(true);
+                          },
+                          child: const Icon(
+                            Icons.add,
+                            size: 20,
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10, right: 10),
-                          child: Icon(
-                            con.adding.value ? Icons.add : Icons.remove,
-                            color: Colors.green,
-                            size: 15,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        child: Icon(
+                          con.adding.value ? Icons.add : Icons.remove,
+                          color: Colors.green,
+                          size: 15,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 35,
+                        width: 50,
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: con.adding.value == false
+                                ? Colors.red
+                                : Colors.transparent,
+                            foregroundColor:
+                                con.adding.value ? Colors.white : Colors.black,
+                          ),
+                          onPressed: () {
+                            con.addingRemoving(false);
+                          },
+                          child: const Icon(
+                            Icons.remove,
+                            size: 20,
                           ),
                         ),
-                        SizedBox(
-                          height: 35,
-                          width: 50,
-                          child: OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: con.adding.value == false
-                                  ? Colors.red
-                                  : Colors.transparent,
-                              foregroundColor: con.adding.value
-                                  ? Colors.white
-                                  : Colors.black,
-                            ),
-                            onPressed: () {
-                              con.addingRemoving(false);
-                            },
-                            child: const Icon(
-                              Icons.remove,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                        CustomWidgets.gap(w: 5),
-                        Text(
-                          "${con.countUser.rack}-${con.countUser.bay}-${con.countUser.level}",
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.merge(const TextStyle(
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              )),
-                        ),
-                        CustomWidgets.gap(w: 5),
-                        Text(
-                          "${con.totalQty}",
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleLarge
-                              ?.merge(const TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              )),
-                        ),
-                      ],
-                    )),
+                      ),
+                      CustomWidgets.gap(w: 5),
+                      Text(
+                        "${con.countUser.rack}-${con.countUser.bay}-${con.countUser.level}",
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.merge(const TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            )),
+                      ),
+                      CustomWidgets.gap(w: 5),
+                      Text(
+                        "${con.totalQty}",
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge
+                            ?.merge(const TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            )),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -345,9 +366,9 @@ class DropDownWithTitleWidget extends StatelessWidget {
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.merge(const TextStyle(
-                fontWeight: FontWeight.w500,
-              )),
+          // style: Theme.of(context).textTheme.titleMedium?.merge(const TextStyle(
+          //       fontWeight: FontWeight.w500,
+          //     )),
         ),
         DropdownButtonHideUnderline(
           child: DropdownButtonFormField<dynamic>(
@@ -371,7 +392,8 @@ class DropDownWithTitleWidget extends StatelessWidget {
 
 class IndividualWidget extends StatelessWidget {
   final CountController con;
-  final InputWithKeyboardControlFocusNode barcodeFocusNode;
+  // final InputWithKeyboardControlFocusNode barcodeFocusNode;
+  final FocusNode barcodeFocusNode;
   const IndividualWidget({
     super.key,
     required this.con,
@@ -382,11 +404,12 @@ class IndividualWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
     FocusNode qtyFocusNode = FocusNode();
-    Item? itemFromSearch = Get.arguments;
-    log(itemFromSearch.toString());
-    if (itemFromSearch != null) {
-      con.individualtextEditingController.clear();
-      con.individualtextEditingController.text = "${itemFromSearch.barcode!}^";
+    var con = Get.find<CountController>();
+    //Item? itemFromSearch = Get.arguments;
+    // log(itemFromSearch.toString());
+    if (con.itemFromSearch != null) {
+      con.individualtextEditingController.value.text =
+          con.itemFromSearch!.barcode!;
       qtyFocusNode.requestFocus();
     }
     return Column(
@@ -417,29 +440,75 @@ class IndividualWidget extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text("Barcode"),
-                              InputWithKeyboardControl(
-                                controller: con.individualtextEditingController,
-                                focusNode: barcodeFocusNode,
-                                width: 300,
-                                showButton: true,
-                                startShowKeyboard: false,
-                                style: Theme.of(context).textTheme.bodyMedium!,
-                                autofocus: true,
-                                onChanged: (p0) {
-                                  if (p0.contains("^")) {
-                                    con
-                                        .onIndividualBarcodeRead(p0)
-                                        .then((value) {
-                                      if (value) {
-                                        qtyFocusNode.requestFocus();
-                                      } else {
-                                        con.individualtextEditingController
-                                            .clear();
-                                      }
-                                    });
-                                  }
-                                },
+                              SizedBox(
+                                height: 35,
+                                child: Obx(() => TextField(
+                                      controller: con
+                                          .individualtextEditingController
+                                          .value,
+                                      focusNode: barcodeFocusNode,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium!,
+                                      autofocus: true,
+                                      keyboardType: TextInputType.number,
+                                      textInputAction: TextInputAction.next,
+                                      onEditingComplete: () {
+                                        con
+                                            .onIndividualBarcodeRead(con
+                                                .individualtextEditingController
+                                                .value
+                                                .text)
+                                            .then((value) {
+                                          if (value) {
+                                            qtyFocusNode.requestFocus();
+                                          } else {
+                                            con.soundAndVibrate(error: true);
+                                            Get.dialog(
+                                                const WrongBarcodeAlert());
+                                          }
+                                        });
+                                      },
+                                      decoration: CustomWidgets()
+                                          .dropDownInputDecoration(),
+                                      onChanged: (p0) {
+                                        if (p0.contains("^")) {
+                                          con
+                                              .onIndividualBarcodeRead(p0)
+                                              .then((value) {
+                                            if (value) {
+                                              qtyFocusNode.requestFocus();
+                                            } else {
+                                              con.soundAndVibrate(error: true);
+                                              Get.dialog(
+                                                  const WrongBarcodeAlert());
+                                            }
+                                          });
+                                        }
+                                      },
+                                    )),
                               ),
+                              // InputWithKeyboardControl(
+                              //   controller: con.individualtextEditingController,
+                              // focusNode: barcodeFocusNode,
+                              //   width: 300,
+                              //   showButton: true,
+                              //   startShowKeyboard: false,
+                              //   style: Theme.of(context).textTheme.bodyMedium!,
+                              //   autofocus: true,
+                              //   textInputType: TextInputType.number,
+                              // onChanged: (p0) {
+                              //   if (p0.contains("^")) {
+                              //     con
+                              //         .onIndividualBarcodeRead(p0)
+                              //         .then((value) {
+                              //       if (value) {
+                              //         qtyFocusNode.requestFocus();
+                              //       }
+                              //     });
+                              //   }
+                              // },
+                              // ),
                             ],
                           ),
                         ),
@@ -455,9 +524,40 @@ class IndividualWidget extends StatelessWidget {
                                     con.individualQtytextEditingController,
                                 focusNode: qtyFocusNode,
                                 keyboardType: TextInputType.number,
+                                // maxLength: 5,
+                                // buildCounter: null,
+                                onTap: () {
+                                  log(con.individualtextEditingController.value
+                                      .text);
+                                  if (con.individualtextEditingController.value
+                                          .text ==
+                                      "") {
+                                    con.soundAndVibrate(error: true);
+                                    Get.dialog(const WrongBarcodeAlert(
+                                      title: "No Barcode",
+                                      content: "Enter or Read barcode.",
+                                    ));
+                                    barcodeFocusNode.requestFocus();
+                                  } else {
+                                    con
+                                        .onIndividualBarcodeRead(con
+                                            .individualtextEditingController
+                                            .value
+                                            .text)
+                                        .then((value) {
+                                      if (!value) {
+                                        barcodeFocusNode.requestFocus();
+                                        con.soundAndVibrate(error: true);
+                                        Get.dialog(const WrongBarcodeAlert());
+                                      }
+                                    });
+                                  }
+                                },
                                 decoration:
                                     CustomWidgets().dropDownInputDecoration(),
                                 onFieldSubmitted: (p0) {
+                                  log("message");
+
                                   con.onIndividualBarcodeSave().then((value) =>
                                       barcodeFocusNode.requestFocus());
                                 },
@@ -587,27 +687,40 @@ class LastItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // color: Colors.amber,
-      // height: 40,
+    return SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Wrap(
-        children: [
-          Text(
-            "Last Item :",
-            style:
-                Theme.of(context).textTheme.titleMedium?.merge(const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    )),
-          ),
-          if (countItem != null)
-            Text(
-              " ${countItem?.itemName}",
-              // "kabvkljansvkjnkjvnkjdfnvkjsdfkjvjksdbfvkjsdfjkvkdsfbvjkdbfvhjbsdhfbvjhsdbfvhjbdfhvjhdsbfvhjbsdfhvbjhdsfbvjhsdbfvjhbsdjfhvbjhdsbfvjsdbfvjb",
-              overflow: TextOverflow.clip,
-            )
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Wrap(
+          children: [
+            if (countItem != null)
+              Text(
+                "Last Item : ${countItem?.barcode} | ${countItem?.itemName}",
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.merge(const TextStyle(
+                        // fontWeight: FontWeight.bold,
+                        )),
+              )
+            else
+              Text(
+                "Last Item :",
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.merge(const TextStyle(
+                        // fontWeight: FontWeight.bold,
+                        )),
+              )
+            // if (countItem != null)
+            //   Text(
+            //     "${countItem?.barcode} | ${countItem?.itemName}",
+            //     // "kabvkljansvkjnkjvnkjdfnvkjsdfkjvjksdbfvkjsdfjkvkdsfbvjkdbfvhjbsdhfbvjhsdbfvhjbdfhvjhdsbfvhjbsdfhvbjhdsfbvjhsdbfvjhbsdjfhvbjhdsbfvjsdbfvjb",
+            //     overflow: TextOverflow.clip,
+            //   ),
+          ],
+        ),
       ),
     );
   }
@@ -861,6 +974,8 @@ class CommonTableWdiget extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (con.scannedBarcodes.isEmpty)
+                  const Expanded(child: Center(child: Text("No Items Yet"))),
                 Expanded(
                   child: ListView.builder(
                     itemCount: con.scannedBarcodes.length,

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:g_count/widgets/custom_widgets.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import '../repositories/dashboard_repo.dart';
 import '/db/db_helper.dart';
@@ -18,6 +19,7 @@ import '../routes.dart';
 class AdminController extends GetxController {
   String _identifier = 'Unknown';
 
+  var connection = false.obs;
   var settingsImport = false.obs;
   var itemsImport = false.obs;
   var countExport = false.obs;
@@ -48,13 +50,24 @@ class AdminController extends GetxController {
   Future<void> getStatus() async {
     var settingsFromDB =
         await DBHelper.getAllItems(tableName: DBHelper.countSettingsTable);
-    log(settingsFromDB.toString());
-    List<CountSetting> countSettings =
-        settingsFromDB.map((e) => CountSetting.fromJson(e)).toList();
-    countSetting = countSettings.first;
-    settingsImport.value = true;
+    if (settingsFromDB.isNotEmpty) {
+      log(settingsFromDB.toString());
+      List<CountSetting> countSettings =
+          settingsFromDB.map((e) => CountSetting.fromJson(e)).toList();
+      countSetting = countSettings.first;
+      settingsImport.value = true;
+    } else {
+      settingsImport.value = false;
+    }
     var length = await DBHelper.getTableLength(tableName: DBHelper.partTable);
     itemsImport.value = length > 0 ? true : false;
+    checkInternetConnection();
+  }
+
+  Future<bool> checkInternetConnection() async {
+    final bool isConnected = await InternetConnectionChecker().hasConnection;
+    connection.value = isConnected;
+    return isConnected;
   }
 
   Future<void> importSettings() async {
@@ -207,12 +220,21 @@ class AdminController extends GetxController {
     } catch (e) {
       return -1;
     }
-    return 1;
+    return 0;
   }
 
-  // delete all database and bock back button too
+  Future<bool> checkIfDBDeletable() async {
+    var result = await DBHelper.getItems(
+        tableName: DBHelper.countSettingsTable,
+        columnName: DBHelper.statCountSettings,
+        condition: "Scheduled");
+    log(result.toString());
+    return result.isEmpty ? true : false;
+  }
 
+  // delete all database and block back button too
   Future<void> deleteDatabase() async {
+    // count completed, can delete db
     // take a backup before deleting??
     var result = await Future.wait([
       DBHelper.deleteAllItem(tableName: DBHelper.countSettingsTable),
@@ -239,6 +261,7 @@ class AdminController extends GetxController {
         duration: 6,
       );
     } else {
+      getStatus();
       //success
       Get.offAllNamed(RouteLinks.admin);
       CustomWidgets.customSnackBar(

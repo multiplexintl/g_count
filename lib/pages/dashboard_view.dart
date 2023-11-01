@@ -62,14 +62,22 @@ class DashBoardPage extends StatelessWidget {
             CustomWidgets.gap(
               h: 30,
             ),
-            DashboardWidget(
-              title: "Counted Racks",
-              value: "${con.dashBoard.value.countedRacks}",
+            GetBuilder<DashBoardController>(
+              builder: (con) {
+                return DashboardWidget(
+                  title: "Counted Racks",
+                  value: "${con.dashBoard.value.countedRacks}",
+                );
+              },
             ),
-            DashboardWidget(
-              title: "Counted Qty",
-              value: "${con.dashBoard.value.countedQty}",
-              color: Colors.green,
+            GetBuilder<DashBoardController>(
+              builder: (con) {
+                return DashboardWidget(
+                  title: "Counted Qty",
+                  value: "${con.dashBoard.value.countedQty}",
+                  color: Colors.green,
+                );
+              },
             ),
             const Divider(
               color: Colors.white,

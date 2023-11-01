@@ -31,22 +31,36 @@ class AdminPage extends StatelessWidget {
               HomeWidget(
                 asset: "assets/icons/check_link.png",
                 title: "Check\nConnection",
-                onTap: () {},
+                onTap: () async {
+                  await con.checkInternetConnection();
+                },
               ),
               HomeWidget(
                 asset: "assets/icons/remove-database.png",
                 title: "Delete\nDatabase",
-                onTap: () {
-                  CustomWidgets.customDialogue(
-                    title: "Delete Database??",
-                    subTitle:
-                        "Are you sure you want to delete all databases? This is NOT REVERSIBLE!!!",
-                    onPressed: () {
-                      Get.back();
-                      CustomWidgets.startLoading(context);
-                      con.deleteDatabase();
-                    },
-                  );
+                onTap: () async {
+                  await con.checkIfDBDeletable().then((value) {
+                    if (value) {
+                      CustomWidgets.customDialogue(
+                        title: "Delete Database??",
+                        subTitle:
+                            "Are you sure you want to delete all databases? This is NOT REVERSIBLE!!!",
+                        onPressed: () async {
+                          Get.back();
+                          CustomWidgets.startLoading(context);
+                          con.deleteDatabase();
+                        },
+                      );
+                    } else {
+                      CustomWidgets.customDialogue(
+                          title: "Not Finalized",
+                          subTitle:
+                              "The count status is still scheduled. Finalize the count, before deleting the database.",
+                          onPressed: () {
+                            Get.back();
+                          });
+                    }
+                  });
                 },
               ),
               HomeWidget(
@@ -103,6 +117,11 @@ class AdminPage extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       CustomWidgets.gap(h: 20),
+                      statusWidget(
+                        context: context,
+                        value: con.connection.value,
+                        title: "Internet Connection : ",
+                      ),
                       statusWidget(
                         context: context,
                         value: con.settingsImport.value,

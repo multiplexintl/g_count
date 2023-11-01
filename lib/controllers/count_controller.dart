@@ -24,11 +24,13 @@ class CountController extends GetxController {
   }
 
   var textEditingController = TextEditingController();
-  var individualtextEditingController = TextEditingController();
+  var individualtextEditingController = TextEditingController().obs;
   var individualQtytextEditingController = TextEditingController();
+  var byCodetextEditingController = TextEditingController().obs;
   var byCodeQtytextEditingController = TextEditingController();
   String? selectedBrand;
   Item? selectedItem;
+  var indBarcodevalid = false.obs;
 
   CountUser countUser = CountUser();
   var adding = true.obs;
@@ -46,27 +48,27 @@ class CountController extends GetxController {
   var rackNumberController = TextEditingController().obs;
   String? rackNumber;
   Item? lastItem;
+  Item? itemFromSearch;
 
   List<TempCount> scannedBarcodes = [];
   final player = AudioPlayer();
   final String errorSound = "sound/wrong_barcode_1.wav";
   final String okSound = "sound/wrong_barcode_1.wav";
 
-  Future<void> getItems() async {
-    var itemsFromDB = await DBHelper.getAllItems(tableName: DBHelper.partTable);
-    // log(itemsFromDB.toString());
-    items = itemsFromDB.map((e) => Item.fromJson(e)).toList();
-    brands = items.map((e) => e.brand).toSet().toList();
-    //log(brands.toString());
-  }
-
   //
   Future<void> setSettings({Item? item}) async {
     //item from items view is coming here
+    // instead of checking count user, check for temp count length
     log(item.toString());
-    var countUserFromDB =
-        await DBHelper.getAllItems(tableName: DBHelper.countUserTable);
-    if (countUserFromDB.isEmpty) {
+    if (item != null) {
+      itemFromSearch = item;
+      individualtextEditingController.value.text = itemFromSearch!.barcode!;
+      lastItem = itemFromSearch;
+    }
+
+    int tempLength =
+        await DBHelper.getTableLength(tableName: DBHelper.tempCountTable);
+    if (tempLength <= 0) {
       var settingsFromDB =
           await DBHelper.getAllItems(tableName: DBHelper.countSettingsTable);
       List<CountSetting> countSettings =
@@ -83,9 +85,11 @@ class CountController extends GetxController {
       rack.clear();
       bayNo.clear();
       levelNo.clear();
-      Get.toNamed(RouteLinks.count, arguments: item);
+      Get.toNamed(RouteLinks.count);
     } else {
       // log(countUserFromDB.toString());
+      var countUserFromDB =
+          await DBHelper.getAllItems(tableName: DBHelper.countUserTable);
       countUser = countUserFromDB
           .map((json) => CountUser.fromJson(json))
           .toList()
@@ -93,7 +97,7 @@ class CountController extends GetxController {
       await getCountItems();
       await getItems();
       log(countUser.toJson().toString());
-      Get.toNamed(RouteLinks.counting, arguments: item);
+      Get.toNamed(RouteLinks.counting);
     }
   }
 
@@ -110,12 +114,22 @@ class CountController extends GetxController {
     update();
   }
 
+  Future<void> getItems() async {
+    var itemsFromDB = await DBHelper.getAllItems(tableName: DBHelper.partTable);
+    // log(itemsFromDB.toString());
+    items = itemsFromDB.map((e) => Item.fromJson(e)).toList();
+    brands = items.map((e) => e.brand).toSet().toList();
+    brands.sort();
+    onSelectBrand(brand: brands.first!);
+    //log(brands.toString());
+  }
+
   void createRack({required UserMaster value}) {
     countUser.user = value;
     rack = rackMaster.map((e) => e.rackNo!).toSet().toList();
-    bayNo.clear();
-    levelNo.clear();
-    rackNumberController.value.text = "";
+    // bayNo.clear();
+    // levelNo.clear();
+    // rackNumberController.value.text = "";
     update();
   }
 
@@ -185,22 +199,35 @@ class CountController extends GetxController {
     await getItems();
     rackNumber = rackNumberController.value.text;
     textEditingController.clear();
-    individualtextEditingController.clear();
+    individualtextEditingController.value.clear();
     individualQtytextEditingController.clear();
     byCodeQtytextEditingController.clear();
-    selectedBrand = null;
+    // selectedBrand = null;
     selectedItem = null;
-    Get.toNamed(RouteLinks.counting, arguments: Get.arguments);
+    lastItem = null;
+    log(itemFromSearch.toString());
+    Get.offNamed(RouteLinks.counting);
   }
 
   void onSelectBrand({required String brand}) {
+    selectedItem = null;
+    byCodetextEditingController.value.clear();
     selectedBrand = brand;
     itemCodes = items.where((element) => element.brand == brand).toList();
     update();
   }
 
+  List<Item?> getSuggestions(String query) {
+    List<Item?> matches = <Item>[];
+    matches.addAll(itemCodes);
+    matches.retainWhere(
+        (s) => s!.itemCode!.toLowerCase().contains(query.toLowerCase()));
+    return matches;
+  }
+
   void onSelectItem({required Item item}) {
     lastItem = item;
+    byCodetextEditingController.value.text = item.itemCode!;
     update();
     selectedItem = item;
   }
@@ -249,6 +276,7 @@ class CountController extends GetxController {
     scannedBarcodes = finalItem.reversed.toList();
     selectedItem = null;
     byCodeQtytextEditingController.text = "";
+    byCodetextEditingController.value.clear();
     adding.value = true;
     await getSumOfQty();
     update();
@@ -260,7 +288,7 @@ class CountController extends GetxController {
 
   // Continues Barcode Read
 
-  void onBarcodeReadContinues(String value) async {
+  Future<void> onBarcodeReadContinues(String value) async {
     value = value.replaceAll('^', '');
     log(value);
     Item? readItem;
@@ -297,6 +325,8 @@ class CountController extends GetxController {
         ));
       }
     } else {
+      lastItem = Item(barcode: value, itemName: "Item Not Found");
+      update();
       log("invalid barcode");
       soundAndVibrate(error: true);
       Get.dialog(const WrongBarcodeAlert());
@@ -307,7 +337,7 @@ class CountController extends GetxController {
   }
 
   void clearText() async {
-    individualtextEditingController.clear();
+    individualtextEditingController.value.clear();
     update();
   }
 
@@ -323,10 +353,9 @@ class CountController extends GetxController {
     Item? readItem;
     readItem = items.firstWhereOrNull((element) =>
         element.barcode ==
-        individualtextEditingController.text.replaceAll('^', ""));
+        individualtextEditingController.value.text.replaceAll('^', ""));
     if (readItem != null) {
       log(readItem.toString());
-
       try {
         TempCount tempCount = TempCount(
           partCode: readItem.itemCode!,
@@ -349,6 +378,7 @@ class CountController extends GetxController {
         log(finalItem.toString());
         adding.value = true;
         await getSumOfQty();
+
         update();
       } catch (e) {
         Get.dialog(const WrongBarcodeAlert(
@@ -361,36 +391,48 @@ class CountController extends GetxController {
       Get.dialog(const WrongBarcodeAlert());
     }
     individualQtytextEditingController.clear();
-    individualtextEditingController.clear();
+    individualtextEditingController.value.clear();
+    indBarcodevalid.value = false;
+    itemFromSearch = null;
   }
 
   Future<bool> onIndividualBarcodeRead(String value) async {
     value = value.replaceAll('^', '');
+    individualtextEditingController.value.text = value;
     Item? readItem;
     readItem = items.firstWhereOrNull((element) => element.barcode == value);
     if (readItem != null) {
       lastItem = readItem;
+      indBarcodevalid.value = true;
       update();
       return true;
     } else {
-      soundAndVibrate(error: true);
-      Get.dialog(const WrongBarcodeAlert());
+      indBarcodevalid.value = false;
+      // soundAndVibrate(error: true);
+      // Get.dialog(const WrongBarcodeAlert());
       return false;
     }
   }
 
   Future<void> onIndividualBarcodeSave() async {
-    log(individualtextEditingController.text);
-    if (individualtextEditingController.text.contains("^") &&
-        (individualQtytextEditingController.text != "" &&
-            int.tryParse(individualQtytextEditingController.text)! > 0)) {
-      log("validated");
-      onIndividualBarcodeUpdate();
-    } else {
-      log("not validated qty");
+    log(individualQtytextEditingController.text);
+    if (!await onIndividualBarcodeRead(
+            individualtextEditingController.value.text) ||
+        individualQtytextEditingController.text == "") {
+      log("not validated");
+      soundAndVibrate(error: true);
       Get.dialog(const WrongBarcodeAlert(
-        content: "Error in barcode or quantity",
+        content: "Wrong Barcode!!!",
       ));
+    } else if (!(int.tryParse(individualQtytextEditingController.text)! > 0)) {
+      log("not validated qty");
+      soundAndVibrate(error: true);
+      Get.dialog(const WrongBarcodeAlert(
+        content: "Not a valid quantity",
+      ));
+    } else {
+      log("valid barcode and qty");
+      onIndividualBarcodeUpdate();
     }
   }
 
@@ -407,7 +449,7 @@ class CountController extends GetxController {
           Get.back();
           await clearUser().then((value) {
             if (value != -1) {
-              lastItem = Item(itemName: "");
+              lastItem = null;
               Get.back();
             }
           });
@@ -416,15 +458,15 @@ class CountController extends GetxController {
     } else {
       log("items found to clear. Delete User");
       CustomWidgets.customDialogue(
-        title: "Clear Table??",
-        subTitle: "Are you sure to delete the count? This is not reversible!!",
+        title: "Clear Count??",
+        subTitle: "Are you sure to clear the count? This is not reversible!!",
         onPressed: () async {
           Get.back();
           var result =
               await DBHelper.deleteAllItem(tableName: DBHelper.tempCountTable);
           if (result != -1) {
             scannedBarcodes.clear();
-            lastItem = Item(itemName: "");
+            lastItem = null;
             await getSumOfQty();
           }
           update();
@@ -518,6 +560,7 @@ class CountController extends GetxController {
     if (result1.isNotEmpty && result2.isNotEmpty) {
       await DBHelper.deleteAllItem(tableName: DBHelper.tempCountTable);
       scannedBarcodes.clear();
+      lastItem = Item(itemName: "");
       await getSumOfQty();
       await clearUser();
       Get.back();

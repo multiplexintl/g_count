@@ -275,15 +275,17 @@ class CustomWidgets {
     );
   }
 
-  InputDecoration dropDownInputDecoration() {
-    return const InputDecoration(
-      border: OutlineInputBorder(),
-      contentPadding: EdgeInsets.only(left: 5),
-      constraints: BoxConstraints(
+  InputDecoration dropDownInputDecoration({String? labelText}) {
+    return InputDecoration(
+      border: const OutlineInputBorder(),
+      labelText: labelText,
+      // labelStyle: ,
+      contentPadding: const EdgeInsets.only(left: 5),
+      constraints: const BoxConstraints(
         maxHeight: 35,
       ),
       filled: true,
-      fillColor: Color(0xFFC4D8DC),
+      fillColor: const Color(0xFFC4D8DC),
     );
   }
 }

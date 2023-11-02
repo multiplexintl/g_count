@@ -206,9 +206,7 @@ class CountController extends GetxController {
       selectedItem = null;
       lastItem = null;
       Get.toNamed(RouteLinks.counting);
-    } else{
-      
-    }
+    } else {}
   }
 
   void onSelectBrand({required String brand}) {

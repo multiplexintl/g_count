@@ -281,13 +281,13 @@ class DBHelper {
     final database = await db;
     final List<Map<String, dynamic>> result = await database
         .rawQuery('SELECT SUM($columnName) as count FROM $tableName');
-    log(result.toString());
+    // log(result.toString());
 
     if (result.isNotEmpty && result.first['count'] != null) {
       log("$tableName $columnName sum is ${result.first['count']}");
       return result.first['count'] as int;
     } else {
-      log("0");
+      // log("0");
       return 0;
     }
   }

@@ -19,7 +19,7 @@ class SplashScreenController extends GetxController {
     if (settingsFromDB.isNotEmpty) {
       Get.offAndToNamed(RouteLinks.home);
     } else {
-      Get.offAndToNamed(RouteLinks.admin , arguments: false);
+      Get.offAndToNamed(RouteLinks.admin, arguments: false);
     }
   }
 }

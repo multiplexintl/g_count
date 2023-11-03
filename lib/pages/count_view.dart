@@ -17,126 +17,136 @@ class CountPage extends StatelessWidget {
       resizeToAvoidBottomInset: false,
       body: Padding(
         padding: const EdgeInsets.only(left: 14, right: 14, top: 20),
-        child: Container(
-          width: double.infinity,
-          height: 450,
-          alignment: Alignment.topCenter,
-          padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
-          color: const Color(0xFFE4DBD5),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              NameDropDownWidget(
-                title: "Name",
-                items: con.users.map((UserMaster items) {
-                  return DropdownMenuItem(
-                    value: items,
-                    child: Text(items.userName!),
-                  );
-                }).toList(),
-                dropdownvalue: null,
-                onChanged: (value) {
-                  con.createRack(value: value);
-                },
-              ),
-              GetBuilder<CountController>(
-                builder: (con) {
-                  return NameDropDownWidget(
-                    title: "Rack",
-                    items: con.rack.map((String items) {
-                      return DropdownMenuItem(
-                        value: items,
-                        child: Text(items),
-                      );
-                    }).toList(),
-                    dropdownvalue: con.countUser.rack,
-                    onChanged: (value) {
-                      con.createBay(rack: value);
-                    },
-                  );
-                },
-              ),
-              GetBuilder<CountController>(
-                builder: (con) {
-                  return NameDropDownWidget(
-                    title: "Bay",
-                    items: con.bayNo.map((String? items) {
-                      return DropdownMenuItem(
-                        value: items,
-                        child: Text(items!),
-                      );
-                    }).toList(),
-                    dropdownvalue: con.countUser.bay,
-                    onChanged: (value) {
-                      con.createlevel(bay: value);
-                    },
-                  );
-                },
-              ),
-              GetBuilder<CountController>(
-                builder: (con) {
-                  return NameDropDownWidget(
-                    title: "Level",
-                    items: con.levelNo.map((String? items) {
-                      return DropdownMenuItem(
-                        value: items,
-                        child: Text(items!),
-                      );
-                    }).toList(),
-                    dropdownvalue: con.countUser.level,
-                    onChanged: (value) {
-                      con.createRackNumber(value: value);
-                    },
-                  );
-                },
-              ),
-              Text(
-                "Rack Number",
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.merge(const TextStyle(
-                      fontWeight: FontWeight.w500,
-                    )),
-              ),
-              Obx(() => TextFormField(
-                    enabled: false,
-                    controller: con.rackNumberController.value,
-                    decoration: CustomWidgets().dropDownInputDecoration(),
-                  )),
-              CustomWidgets.gap(h: 15),
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                      ),
-                      onPressed: () {
-                        Get.back();
+        child: PhysicalModel(
+          color: Colors.black,
+          elevation: 4,
+          borderRadius: const BorderRadius.all(Radius.circular(15)),
+          shape: BoxShape.rectangle,
+          child: Container(
+            width: double.infinity,
+            height: 450,
+            alignment: Alignment.topCenter,
+            padding: const EdgeInsets.only(top: 20, left: 16, right: 16),
+            decoration: BoxDecoration(
+                color: const Color(0xFFE4DBD5),
+                borderRadius: BorderRadius.circular(
+                  13,
+                )),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                NameDropDownWidget(
+                  title: "Name",
+                  items: con.users.map((UserMaster items) {
+                    return DropdownMenuItem(
+                      value: items,
+                      child: Text(items.userName!),
+                    );
+                  }).toList(),
+                  dropdownvalue: null,
+                  onChanged: (value) {
+                    con.createRack(value: value);
+                  },
+                ),
+                GetBuilder<CountController>(
+                  builder: (con) {
+                    return NameDropDownWidget(
+                      title: "Rack",
+                      items: con.rack.map((String items) {
+                        return DropdownMenuItem(
+                          value: items,
+                          child: Text(items),
+                        );
+                      }).toList(),
+                      dropdownvalue: con.countUser.rack,
+                      onChanged: (value) {
+                        con.createBay(rack: value);
                       },
-                      child: const Text("Back"),
-                    ),
-                  ),
-                  CustomWidgets.gap(w: 16),
-                  Expanded(child: GetBuilder<CountController>(
-                    builder: (con) {
-                      return ElevatedButton(
+                    );
+                  },
+                ),
+                GetBuilder<CountController>(
+                  builder: (con) {
+                    return NameDropDownWidget(
+                      title: "Bay",
+                      items: con.bayNo.map((String? items) {
+                        return DropdownMenuItem(
+                          value: items,
+                          child: Text(items!),
+                        );
+                      }).toList(),
+                      dropdownvalue: con.countUser.bay,
+                      onChanged: (value) {
+                        con.createlevel(bay: value);
+                      },
+                    );
+                  },
+                ),
+                GetBuilder<CountController>(
+                  builder: (con) {
+                    return NameDropDownWidget(
+                      title: "Level",
+                      items: con.levelNo.map((String? items) {
+                        return DropdownMenuItem(
+                          value: items,
+                          child: Text(items!),
+                        );
+                      }).toList(),
+                      dropdownvalue: con.countUser.level,
+                      onChanged: (value) {
+                        con.createRackNumber(value: value);
+                      },
+                    );
+                  },
+                ),
+                Text(
+                  "Rack Number",
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleMedium
+                      ?.merge(const TextStyle(
+                        fontWeight: FontWeight.w500,
+                      )),
+                ),
+                Obx(() => TextFormField(
+                      enabled: false,
+                      controller: con.rackNumberController.value,
+                      decoration: CustomWidgets().dropDownInputDecoration(),
+                    )),
+                CustomWidgets.gap(h: 15),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor: Colors.red,
                         ),
-                        onPressed: con.rackNumberController.value.text.isEmpty
-                            ? null
-                            : () {
-                                con.createCountUser();
-                              },
-                        child: const Text("Start"),
-                      );
-                    },
-                  )),
-                ],
-              )
-            ],
+                        onPressed: () {
+                          Get.back();
+                        },
+                        child: const Text("Back"),
+                      ),
+                    ),
+                    CustomWidgets.gap(w: 16),
+                    Expanded(child: GetBuilder<CountController>(
+                      builder: (con) {
+                        return ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                          ),
+                          onPressed: con.rackNumberController.value.text.isEmpty
+                              ? null
+                              : () {
+                                  con.createCountUser();
+                                },
+                          child: const Text("Start"),
+                        );
+                      },
+                    )),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),

@@ -23,7 +23,7 @@ class HomePage extends StatelessWidget {
     var countCon = Get.put(CountController());
     Get.put(ItemsController());
     var adminCon = Get.find<AdminController>();
-    Get.put(ReportController());
+    var con = Get.put(ReportController());
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
     return Scaffold(
       appBar: CustomWidgets.customAppBar("gCount"),
@@ -67,6 +67,9 @@ class HomePage extends StatelessWidget {
                 asset: "assets/icons/report.png",
                 title: "Reports",
                 onTap: () {
+                  // con
+                  //     .initilaPage()
+                  //     .then((value) =>
                   Get.toNamed(RouteLinks.reports);
                 },
               ),

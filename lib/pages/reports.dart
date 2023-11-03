@@ -12,70 +12,65 @@ class ReportsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var con = Get.find<ReportController>();
-
+    con.selectedRadio.value = 0;
     return Scaffold(
-      appBar: CustomWidgets.customAppBar("Reports", back: true),
-      // bottomNavigationBar: Container(
-      //   height: 40,
-      //   color: Colors.blue,
-      //   child: Center(
-      //     child: Obx(() => Text(
-      //           "Total Qty: ${con.totalQty.value}",
-      //           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-      //                 color: Colors.red,
-      //                 fontSize: 18,
-      //                 fontWeight: FontWeight.bold,
-      //               ),
-      //         )),
-      //   ),
-      // ),
+      appBar: CustomWidgets.customAppBar(
+        "Reports",
+        back: true,
+      ),
       body: Column(
         children: [
           // summery, detail radio button
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Container(
-              width: double.infinity,
-              height: 70,
-              decoration: const BoxDecoration(
-                  color: Color(0xFFDFCDCC),
-                  borderRadius: BorderRadius.all(Radius.circular(16))),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    child: Obx(() => RadioListTile(
-                          visualDensity:
-                              const VisualDensity(horizontal: -4, vertical: -4),
-                          value: 0,
-                          groupValue: con.selectedRadio.value,
-                          activeColor: Colors.green,
-                          title: Text(
-                            "Summery",
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          onChanged: (val) {
-                            con.setSelectedRadio(val!);
-                          },
-                        )),
-                  ),
-                  Expanded(
-                    child: Obx(() => RadioListTile(
-                          visualDensity:
-                              const VisualDensity(horizontal: -4, vertical: -4),
-                          value: 1,
-                          groupValue: con.selectedRadio.value,
-                          activeColor: Colors.green,
-                          title: Text(
-                            "Detail",
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          onChanged: (val) {
-                            con.setSelectedRadio(val!);
-                          },
-                        )),
-                  ),
-                ],
+            child: PhysicalModel(
+              color: Colors.black,
+              elevation: 4,
+              borderRadius: const BorderRadius.all(Radius.circular(15)),
+              shape: BoxShape.rectangle,
+              child: Container(
+                width: double.infinity,
+                height: 70,
+                decoration: const BoxDecoration(
+                    color: Color(0xFFDFCDCC),
+                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: Obx(() => RadioListTile(
+                            visualDensity: const VisualDensity(
+                                horizontal: -4, vertical: -4),
+                            value: 0,
+                            groupValue: con.selectedRadio.value,
+                            activeColor: Colors.green,
+                            title: Text(
+                              "Summery",
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            onChanged: (val) {
+                              con.setSelectedRadio(val!);
+                            },
+                          )),
+                    ),
+                    Expanded(
+                      child: Obx(() => RadioListTile(
+                            visualDensity: const VisualDensity(
+                                horizontal: -4, vertical: -4),
+                            value: 1,
+                            groupValue: con.selectedRadio.value,
+                            activeColor: Colors.green,
+                            title: Text(
+                              "Detail",
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            onChanged: (val) {
+                              con.setSelectedRadio(val!);
+                            },
+                          )),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -159,7 +154,11 @@ class DetailView extends StatelessWidget {
                           items: con.users?.map((UserMaster items) {
                             return DropdownMenuItem(
                               value: items.userCd,
-                              child: Text(items.userName!),
+                              child: Text(
+                                items.userName!,
+                                overflow: TextOverflow.clip,
+                                textWidthBasis: TextWidthBasis.longestLine,
+                              ),
                             );
                           }).toList(),
                           onChanged: (p0) {
@@ -171,7 +170,7 @@ class DetailView extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 15, right: 15),
+                    padding: const EdgeInsets.only(left: 10, right: 10),
                     child: Column(
                       children: [
                         OutlinedButton(
@@ -223,6 +222,7 @@ class RowDropWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return DropdownButtonHideUnderline(
       child: DropdownButtonFormField(
+        padding: EdgeInsets.zero,
         decoration: CustomWidgets().dropDownInputDecoration(labelText: title),
         value: dropdownvalue,
         items: items,
@@ -243,7 +243,7 @@ class CommonTableWdiget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(left: 8.0, right: 8, top: 8),
       child: Column(
         children: [
           // Heading Container
@@ -332,103 +332,111 @@ class CommonTableWdiget extends StatelessWidget {
             ),
           ),
           if (con.summeryReportItems.isEmpty)
-            const Expanded(child: Center(child: Text("No Items Yet"))),
-          Expanded(
-            child: ListView.builder(
-              itemCount: con.summeryReportItems.length,
-              itemBuilder: (context, index) {
-                var report = con.summeryReportItems[index];
-                return Padding(
-                  padding: const EdgeInsets.only(top: 3),
-                  child: Container(
-                    // height: 40,
-                    decoration: BoxDecoration(
+            const Expanded(child: Center(child: Text("No Items"))),
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(10),
+                bottomRight: Radius.circular(10)),
+            child: SizedBox(
+              height: 387,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: con.summeryReportItems.length,
+                itemBuilder: (context, index) {
+                  var report = con.summeryReportItems[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 3),
+                    child: Container(
+                      // height: 40,
+                      decoration: BoxDecoration(
                         color: index.isEven
                             ? Colors.grey.withOpacity(0.3)
                             : Colors.blueGrey[100],
-                        borderRadius: BorderRadius.only(
-                          bottomLeft:
-                              (index == con.summeryReportItems.length - 1)
-                                  ? const Radius.circular(10)
-                                  : const Radius.circular(0),
-                          bottomRight:
-                              (index == con.summeryReportItems.length - 1)
-                                  ? const Radius.circular(10)
-                                  : const Radius.circular(0),
-                        )),
-                    child: Row(
-                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                            height: 40,
-                            width: 40,
-                            alignment: Alignment.center,
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                right: BorderSide(
-                                  color: Colors.black,
-                                  width: 1,
-                                ),
-                              ),
-                            ),
-                            child: Text("${index + 1}",
-                                style: Theme.of(context).textTheme.bodyMedium)),
-                        Container(
-                          height: 40,
-                          width: 85,
-                          alignment: Alignment.center,
-                          decoration: const BoxDecoration(
-                            border: Border(
-                              right: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                          ),
-                          child: Text(report.rackNo!,
-                              style: Theme.of(context).textTheme.bodyMedium),
-                        ),
-                        Container(
-                            height: 40,
-                            width: 160,
-                            alignment: Alignment.center,
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                right: BorderSide(
-                                  color: Colors.black,
-                                  width: 1,
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              report.userName!,
-                              textAlign: TextAlign.center,
-                            )),
-                        Expanded(
-                          child: Container(
+                      ),
+                      child: Row(
+                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
                               height: 40,
+                              width: 40,
                               alignment: Alignment.center,
-                              child: Text("${report.qty}")),
-                        ),
-                      ],
+                              decoration: const BoxDecoration(
+                                border: Border(
+                                  right: BorderSide(
+                                    color: Colors.black,
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              child: Text("${index + 1}",
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium)),
+                          Container(
+                            height: 40,
+                            width: 85,
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                right: BorderSide(
+                                  color: Colors.black,
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            child: Text(report.rackNo!,
+                                style: Theme.of(context).textTheme.bodyMedium),
+                          ),
+                          Container(
+                              height: 40,
+                              width: 160,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                border: Border(
+                                  right: BorderSide(
+                                    color: Colors.black,
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                report.userName!,
+                                textAlign: TextAlign.center,
+                              )),
+                          Expanded(
+                            child: Container(
+                                height: 40,
+                                alignment: Alignment.center,
+                                child: Text("${report.qty}")),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
+          // const Spacer(),
           Padding(
-            padding: const EdgeInsets.all(10),
-            child: Center(
-              child: Obx(() => Text(
-                    "Total Qty: ${con.totalQty.value}",
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.red,
-                          fontSize: 18,
-                        ),
-                  )),
+            padding: const EdgeInsets.only(top: 15),
+            child: Container(
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Obx(() => Text(
+                      "Total Qty: ${con.totalSummeryQty.value}",
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.yellow.shade600,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    )),
+              ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -535,101 +543,105 @@ class DetailsTableWdiget extends StatelessWidget {
             ),
           ),
           if (con.detailsReport.isEmpty)
-            const Expanded(child: Center(child: Text("No Items Yet"))),
-          Expanded(
-            child: ListView.builder(
-              itemCount: con.detailsReport.length,
-              itemBuilder: (context, index) {
-                var report = con.detailsReport[index];
-                return Padding(
-                  padding: const EdgeInsets.only(top: 3),
-                  child: Container(
-                    // height: 40,
-                    decoration: BoxDecoration(
+            const Expanded(child: Center(child: Text("No Items"))),
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(10),
+                bottomRight: Radius.circular(10)),
+            child: SizedBox(
+              height: 258,
+              child: ListView.builder(
+                itemCount: con.detailsReport.length,
+                itemBuilder: (context, index) {
+                  var report = con.detailsReport[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 3),
+                    child: Container(
+                      // height: 40,
+                      decoration: BoxDecoration(
                         color: index.isEven
                             ? Colors.grey.withOpacity(0.3)
                             : Colors.blueGrey[100],
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: (index == con.detailsReport.length - 1)
-                              ? const Radius.circular(10)
-                              : const Radius.circular(0),
-                          bottomRight: (index == con.detailsReport.length - 1)
-                              ? const Radius.circular(10)
-                              : const Radius.circular(0),
-                        )),
-                    child: Row(
-                      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                            height: 40,
-                            width: 40,
-                            alignment: Alignment.center,
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                right: BorderSide(
-                                  color: Colors.black,
-                                  width: 1,
-                                ),
-                              ),
-                            ),
-                            child: Text("${index + 1}",
-                                style: Theme.of(context).textTheme.bodyMedium)),
-                        Container(
-                          height: 40,
-                          width: 85,
-                          alignment: Alignment.center,
-                          decoration: const BoxDecoration(
-                            border: Border(
-                              right: BorderSide(
-                                color: Colors.black,
-                                width: 1,
-                              ),
-                            ),
-                          ),
-                          child: Text(report.rackNo!,
-                              style: Theme.of(context).textTheme.bodyMedium),
-                        ),
-                        Container(
-                            height: 40,
-                            width: 160,
-                            alignment: Alignment.center,
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                right: BorderSide(
-                                  color: Colors.black,
-                                  width: 1,
-                                ),
-                              ),
-                            ),
-                            child: Text(
-                              report.barcode!,
-                              textAlign: TextAlign.center,
-                            )),
-                        Expanded(
-                          child: Container(
+                      ),
+                      child: Row(
+                        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
                               height: 40,
+                              width: 40,
                               alignment: Alignment.center,
-                              child: Text("${report.qty}")),
-                        ),
-                      ],
+                              decoration: const BoxDecoration(
+                                border: Border(
+                                  right: BorderSide(
+                                    color: Colors.black,
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              child: Text("${index + 1}",
+                                  style:
+                                      Theme.of(context).textTheme.bodyMedium)),
+                          Container(
+                            height: 40,
+                            width: 85,
+                            alignment: Alignment.center,
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                right: BorderSide(
+                                  color: Colors.black,
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            child: Text(report.rackNo!,
+                                style: Theme.of(context).textTheme.bodyMedium),
+                          ),
+                          Container(
+                              height: 40,
+                              width: 160,
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                border: Border(
+                                  right: BorderSide(
+                                    color: Colors.black,
+                                    width: 1,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                report.barcode!,
+                                textAlign: TextAlign.center,
+                              )),
+                          Expanded(
+                            child: Container(
+                                height: 40,
+                                alignment: Alignment.center,
+                                child: Text("${report.qty}")),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
-          // Padding(
-          //   padding: const EdgeInsets.all(10),
-          //   child: Center(
-          //     child: Text(
-          //       "Total Qty: ${con.detailsReport.first.qty}",
-          //       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          //             color: Colors.red,
-          //             fontSize: 18,
-          //           ),
-          //     ),
-          //   ),
-          // )
+          const Spacer(),
+          Container(
+            height: 40,
+            decoration: BoxDecoration(
+                color: Colors.blue, borderRadius: BorderRadius.circular(10)),
+            child: Center(
+              child: Obx(() => Text(
+                    "Total Qty: ${con.totalDetailsQty.value}",
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.yellow.shade600,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  )),
+            ),
+          ),
         ],
       ),
     );

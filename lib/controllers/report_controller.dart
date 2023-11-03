@@ -16,7 +16,8 @@ class ReportController extends GetxController {
   RxList<SummeryReport> summeryReportItems = <SummeryReport>[].obs;
   List<TempCount>? totalCountItems;
   RxList<DetailsReport> detailsReport = <DetailsReport>[].obs;
-  var totalQty = 0.obs;
+  var totalSummeryQty = 0.obs;
+  var totalDetailsQty = 0.obs;
   List<String>? items;
   String? selectedItem;
   List<String>? racks;
@@ -34,22 +35,21 @@ class ReportController extends GetxController {
     selectedItem = null;
     selectedRack = null;
     selectedUser = null;
+    totalDetailsQty.value = 0;
     detailsReport.clear();
-    getItems();
-    // racks?.clear();
-    // users?.clear();
-//    getItems();
     update();
   }
 
   void setSelectedRadio(int val) {
     selectedRadio.value = val;
     log(val.toString());
-    pageController.animateToPage(val,
-        duration: const Duration(microseconds: 100), curve: Curves.bounceIn);
-    // if (val == 0) {
-    //   getSummeryReport();
-    // }
+    pageController.jumpToPage(val);
+    // pageController.animateToPage(val,
+    //     duration: const Duration(microseconds: 100), curve: Curves.bounceIn);
+  }
+
+  Future<void> initilaPage() async {
+    pageController.jumpToPage(selectedRadio.value);
   }
 
   Future<void> getSummeryReport() async {
@@ -58,12 +58,16 @@ class ReportController extends GetxController {
     FROM ${DBHelper.tempCountBackTable}, ${DBHelper.usersTable} 
     WHERE ${DBHelper.usersTable}.${DBHelper.userCodeUser} = ${DBHelper.tempCountBackTable}.${DBHelper.userCodeTempCountBack} 
     GROUP BY ${DBHelper.rackNoTempCountBack},${DBHelper.userNameUser}''';
-    totalQty.value = await DBHelper.getSumofColumn(
-        tableName: DBHelper.tempCountBackTable,
-        columnName: DBHelper.qtyTempCountBack);
+    getSummeryQty();
     var result = await DBHelper.getItemsByRawQuery(query);
     summeryReportItems.value =
         result.map((e) => SummeryReport.fromJson(e)).toList();
+  }
+
+  void getSummeryQty() async {
+    totalSummeryQty.value = await DBHelper.getSumofColumn(
+        tableName: DBHelper.tempCountBackTable,
+        columnName: DBHelper.qtyTempCountBack);
   }
 
   Future<void> getItems() async {
@@ -218,6 +222,8 @@ class ReportController extends GetxController {
     }
     var result = await DBHelper.getItemsByRawQuery(query);
     detailsReport.value = result.map((e) => DetailsReport.fromJson(e)).toList();
+    totalDetailsQty.value =
+        detailsReport.fold(0, (sum, report) => sum + report.qty!);
     log(detailsReport.toString());
     update();
   }

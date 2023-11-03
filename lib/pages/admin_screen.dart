@@ -42,6 +42,7 @@ class AdminPage extends StatelessWidget {
                   await con.checkIfDBDeletable().then((value) {
                     if (value) {
                       CustomWidgets.customDialogue(
+                        okText: "OK",
                         title: "Delete Database??",
                         subTitle:
                             "Are you sure you want to delete all databases? This is NOT REVERSIBLE!!!",
@@ -53,6 +54,7 @@ class AdminPage extends StatelessWidget {
                       );
                     } else {
                       CustomWidgets.customDialogue(
+                          okText: "OK",
                           title: "Not Finalized",
                           subTitle:
                               "The count status is still scheduled. Finalize the count, before deleting the database.",
@@ -91,34 +93,37 @@ class AdminPage extends StatelessWidget {
                 asset: "assets/icons/finalize_count.png",
                 title: "Finalize\nCount",
                 onTap: () {
-                  con.checkTempCountAndFinalizeCount().then((value) {
-                    if (value) {
-                      if (con.countSetting.countId != null) {
-                        log(con.countSetting.toString());
-                        CustomWidgets.displayTextInputDialog(
-                            formKey: formKey,
-                            otp: con.countSetting.finalOtp!,
-                            content:
-                                "Are you sure you want to finalize count?\nThis is NOT REVERSIBLE!!!",
-                            onPressedOk: () async {
-                              if (formKey.currentState!.validate()) {
-                                FocusManager.instance.primaryFocus?.unfocus();
-                                Get.back();
-                                CustomWidgets.startLoading(context);
-                                con.checkTempCountAndFinalizeCount();
-                              }
+                  con.checkTempCountAndFinalizeCount().then(
+                    (value) {
+                      if (value) {
+                        if (con.countSetting.countId != null) {
+                          log(con.countSetting.toString());
+                          CustomWidgets.displayTextInputDialog(
+                              formKey: formKey,
+                              otp: con.countSetting.finalOtp!,
+                              content:
+                                  "Are you sure you want to finalize count?\nThis is NOT REVERSIBLE!!!",
+                              onPressedOk: () async {
+                                if (formKey.currentState!.validate()) {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                                  Get.back();
+                                  CustomWidgets.startLoading(context);
+                                  con.checkTempCountAndFinalizeCount();
+                                }
+                              });
+                        }
+                      } else {
+                        CustomWidgets.customDialogue(
+                            okText: "OK",
+                            title: "Failed",
+                            subTitle:
+                                "There are items in temp count. Update temp count first",
+                            onPressed: () {
+                              Get.back();
                             });
                       }
-                    } else {
-                      CustomWidgets.stopLoader();
-                      CustomWidgets.customSnackBar(
-                        title: "Failed",
-                        message:
-                            "There are items in temp count. Update temp count first",
-                        textColor: Colors.red,
-                      );
-                    }
-                  });
+                    },
+                  );
                 },
               ),
               // Obx(() => Center(child: Text("${con.addingItem}")))

@@ -89,6 +89,7 @@ class CustomWidgets {
   }
 
   static Future<dynamic> customDialogue({
+    String? okText,
     required String title,
     required String subTitle,
     required void Function()? onPressed,
@@ -133,7 +134,7 @@ class CustomWidgets {
                   fixedSize: const Size(double.infinity, 40),
                 ),
                 onPressed: onPressed,
-                child: const Text("Confirm"),
+                child: Text(okText ?? "Confirm"),
               ),
             ),
           ],

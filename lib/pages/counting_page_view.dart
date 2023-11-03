@@ -35,7 +35,7 @@ class CountingPage extends StatelessWidget {
           appBar: CustomWidgets.customAppBar("Start Counting", back: true),
           resizeToAvoidBottomInset: false,
           bottomNavigationBar: Container(
-            height: 60,
+            height: 50,
             padding: const EdgeInsets.symmetric(horizontal: 10),
             decoration: BoxDecoration(
               color: Colors.grey.shade400,
@@ -59,6 +59,7 @@ class CountingPage extends StatelessWidget {
                   ButtonsTabBar(
                     onTap: (p0) async {
                       if (p0 == 0) {
+                        FocusManager.instance.primaryFocus?.unfocus();
                         continuesBarcodeFocusNode.requestFocus();
                       }
                       if (p0 == 1) {
@@ -336,7 +337,10 @@ class ByCodeWidget extends StatelessWidget {
         ),
         GetBuilder<CountController>(
           builder: (con) {
-            return CommonTableWdiget(con: con);
+            return CommonTableWdiget(
+              con: con,
+              isSmall: true,
+            );
           },
         ),
       ],
@@ -867,9 +871,11 @@ class CommonTableWdiget extends StatelessWidget {
   const CommonTableWdiget({
     super.key,
     required this.con,
+    this.isSmall = false,
   });
 
   final CountController con;
+  final bool? isSmall;
 
   @override
   Widget build(BuildContext context) {
@@ -976,36 +982,57 @@ class CommonTableWdiget extends StatelessWidget {
                 ),
                 if (con.scannedBarcodes.isEmpty)
                   const Expanded(child: Center(child: Text("No Items Yet"))),
-                SizedBox(
-                  height: 205,
-                  child: ListView.builder(
-                    itemCount: con.scannedBarcodes.length,
-                    itemBuilder: (context, index) {
-                      var barcode = con.scannedBarcodes[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 3),
-                        child: Container(
-                          height: 40,
-                          decoration: BoxDecoration(
-                              color: index.isEven
-                                  ? Colors.grey.withOpacity(0.3)
-                                  : Colors.blueGrey[100],
-                              borderRadius: BorderRadius.only(
-                                bottomLeft:
-                                    (index == con.scannedBarcodes.length - 1)
-                                        ? const Radius.circular(10)
-                                        : const Radius.circular(0),
-                                bottomRight:
-                                    (index == con.scannedBarcodes.length - 1)
-                                        ? const Radius.circular(10)
-                                        : const Radius.circular(0),
-                              )),
-                          child: Row(
-                            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(15),
+                  ),
+                  child: SizedBox(
+                    height: isSmall == true ? 215 : 255,
+                    child: ListView.builder(
+                      itemCount: con.scannedBarcodes.length,
+                      itemBuilder: (context, index) {
+                        var barcode = con.scannedBarcodes[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 3),
+                          child: Container(
+                            height: 40,
+                            decoration: BoxDecoration(
+                                color: index.isEven
+                                    ? Colors.grey.withOpacity(0.3)
+                                    : Colors.blueGrey[100],
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft:
+                                      (index == con.scannedBarcodes.length - 1)
+                                          ? const Radius.circular(10)
+                                          : const Radius.circular(0),
+                                  bottomRight:
+                                      (index == con.scannedBarcodes.length - 1)
+                                          ? const Radius.circular(10)
+                                          : const Radius.circular(0),
+                                )),
+                            child: Row(
+                              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                    height: 40,
+                                    width: 40,
+                                    alignment: Alignment.center,
+                                    decoration: const BoxDecoration(
+                                      border: Border(
+                                        right: BorderSide(
+                                          color: Colors.black,
+                                          width: 1,
+                                        ),
+                                      ),
+                                    ),
+                                    child: Text("${barcode.sno}",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium)),
+                                Container(
                                   height: 40,
-                                  width: 40,
+                                  width: 100,
                                   alignment: Alignment.center,
                                   decoration: const BoxDecoration(
                                     border: Border(
@@ -1015,50 +1042,36 @@ class CommonTableWdiget extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  child: Text("${barcode.sno}",
+                                  child: Text(barcode.partCode,
                                       style: Theme.of(context)
                                           .textTheme
-                                          .bodyMedium)),
-                              Container(
-                                height: 40,
-                                width: 100,
-                                alignment: Alignment.center,
-                                decoration: const BoxDecoration(
-                                  border: Border(
-                                    right: BorderSide(
-                                      color: Colors.black,
-                                      width: 1,
-                                    ),
-                                  ),
+                                          .bodyMedium),
                                 ),
-                                child: Text(barcode.partCode,
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium),
-                              ),
-                              Container(
-                                  height: 40,
-                                  width: 120,
-                                  alignment: Alignment.center,
-                                  decoration: const BoxDecoration(
-                                    border: Border(
-                                      right: BorderSide(
-                                        color: Colors.black,
-                                        width: 1,
+                                Container(
+                                    height: 40,
+                                    width: 120,
+                                    alignment: Alignment.center,
+                                    decoration: const BoxDecoration(
+                                      border: Border(
+                                        right: BorderSide(
+                                          color: Colors.black,
+                                          width: 1,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  child: Text(barcode.barcode)),
-                              Expanded(
-                                child: Container(
-                                    height: 40,
-                                    alignment: Alignment.center,
-                                    child: Text("${barcode.qty}")),
-                              ),
-                            ],
+                                    child: Text(barcode.barcode)),
+                                Expanded(
+                                  child: Container(
+                                      height: 40,
+                                      alignment: Alignment.center,
+                                      child: Text("${barcode.qty}")),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],

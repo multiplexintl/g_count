@@ -106,12 +106,16 @@ class DashBoardPage extends StatelessWidget {
             SizedBox(
               height: 50,
               width: 200,
-              child: Obx(() => ElevatedButton(
+              child: GetBuilder<DashBoardController>(
+                builder: (con) {
+                  return ElevatedButton(
                     onPressed: con.isSyncing.value
                         ? () {}
-                        : () {
-                            con.sync();
-                          },
+                        : con.dashBoard.value.connection != true
+                            ? null
+                            : () {
+                                con.sync();
+                              },
                     child: con.isSyncing.value
                         ? const SizedBox(
                             height: 25,
@@ -121,7 +125,9 @@ class DashBoardPage extends StatelessWidget {
                             ),
                           )
                         : const Text("Sync"),
-                  )),
+                  );
+                },
+              ),
             )
           ],
         ),

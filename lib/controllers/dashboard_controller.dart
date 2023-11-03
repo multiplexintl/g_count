@@ -240,7 +240,7 @@ class DashBoardController extends GetxController {
     try {
       var newString = string.substring(0, string.indexOf("T"));
       DateTime dateTime = DateTime.parse(newString);
-      String formattedDate = DateFormat('yyyy-MM-dd').format(dateTime);
+      String formattedDate = DateFormat('dd-MM-yyyy').format(dateTime);
       return formattedDate;
     } catch (e) {
       //log(e.toString());

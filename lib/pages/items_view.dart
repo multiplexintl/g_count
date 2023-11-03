@@ -12,12 +12,13 @@ class ItemsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var con = Get.find<ItemsController>();
-    TextEditingController searchController = TextEditingController();
+
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         appBar: CustomWidgets.customAppBar("Items", back: true),
+        //  resizeToAvoidBottomInset: true,
         bottomNavigationBar: Container(
             color: Colors.blue,
             alignment: Alignment.center,
@@ -200,24 +201,36 @@ class ItemsView extends StatelessWidget {
                       key: formKey,
                       child: SizedBox(
                         height: 36,
-                        child: TextFormField(
-                          controller: searchController,
-                          validator: (value) {
-                            return value == null || value.isEmpty ? "" : null;
+                        child: GetBuilder<ItemsController>(
+                          builder: (con) {
+                            return TextFormField(
+                              controller: con.searchController.value,
+                              enabled: con.selectedItems.isNotEmpty,
+                              validator: (value) {
+                                return value == null || value.isEmpty
+                                    ? ""
+                                    : null;
+                              },
+                              onChanged: (value) {
+                                if (value.contains('^')) {
+                                  con.clear();
+                                }
+                              },
+                              onEditingComplete: () {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                if (formKey.currentState!.validate()) {
+                                  con.search();
+                                }
+                              },
+                              decoration: CustomWidgets()
+                                  .dropDownInputDecoration()
+                                  .copyWith(
+                                      contentPadding: const EdgeInsets.all(10),
+                                      errorStyle: const TextStyle(
+                                        height: 0,
+                                      )),
+                            );
                           },
-                          onEditingComplete: () {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                            if (formKey.currentState!.validate()) {
-                              con.search(searchController.text);
-                            }
-                          },
-                          decoration: CustomWidgets()
-                              .dropDownInputDecoration()
-                              .copyWith(
-                                  contentPadding: const EdgeInsets.all(10),
-                                  errorStyle: const TextStyle(
-                                    height: 0,
-                                  )),
                         ),
                       ),
                     ),
@@ -238,7 +251,7 @@ class ItemsView extends StatelessWidget {
                                     FocusManager.instance.primaryFocus
                                         ?.unfocus();
                                     if (formKey.currentState!.validate()) {
-                                      con.search(searchController.text);
+                                      con.search();
                                     }
                                   },
                             child: const Text("Search"),
@@ -322,69 +335,76 @@ class CommonTableWdiget extends StatelessWidget {
                     ],
                   ),
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      var item = items[index];
-                      return InkWell(
-                        onTap: () {
-                          con.selectAnItem(item);
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 3),
-                          child: Container(
-                            // height: 50,
-                            decoration: BoxDecoration(
-                                color: index.isEven
-                                    ? Colors.grey.withOpacity(0.3)
-                                    : Colors.blueGrey[100],
-                                borderRadius: BorderRadius.only(
-                                  bottomLeft: (index == items.length - 1)
-                                      ? const Radius.circular(10)
-                                      : const Radius.circular(0),
-                                  bottomRight: (index == items.length - 1)
-                                      ? const Radius.circular(10)
-                                      : const Radius.circular(0),
-                                )),
-                            child: Row(
-                              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                    height: 50,
-                                    width: 40,
-                                    alignment: Alignment.center,
-                                    decoration: const BoxDecoration(
-                                      border: Border(
-                                        right: BorderSide(
-                                          color: Colors.black,
-                                          width: 1,
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(15),
+                  ),
+                  child: SizedBox(
+                    height: 263,
+                    child: ListView.builder(
+                      itemCount: items.length,
+                      itemBuilder: (context, index) {
+                        var item = items[index];
+                        return InkWell(
+                          onTap: () {
+                            con.selectAnItem(item);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 3),
+                            child: Container(
+                              // height: 50,
+                              decoration: BoxDecoration(
+                                  color: index.isEven
+                                      ? Colors.grey.withOpacity(0.3)
+                                      : Colors.blueGrey[100],
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: (index == items.length - 1)
+                                        ? const Radius.circular(10)
+                                        : const Radius.circular(0),
+                                    bottomRight: (index == items.length - 1)
+                                        ? const Radius.circular(10)
+                                        : const Radius.circular(0),
+                                  )),
+                              child: Row(
+                                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                      height: 50,
+                                      width: 40,
+                                      alignment: Alignment.center,
+                                      decoration: const BoxDecoration(
+                                        border: Border(
+                                          right: BorderSide(
+                                            color: Colors.black,
+                                            width: 1,
+                                          ),
                                         ),
                                       ),
+                                      child: Text("${index + 1}",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium)),
+                                  Expanded(
+                                    child: Container(
+                                      // height: 60,
+                                      alignment: Alignment.centerLeft,
+                                      padding: const EdgeInsets.only(left: 5),
+                                      child: Text(
+                                          "${item.barcode!} | ${item.itemCode!}\n${item.itemName}",
+                                          overflow: TextOverflow.visible,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium),
                                     ),
-                                    child: Text("${index + 1}",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium)),
-                                Expanded(
-                                  child: Container(
-                                    // height: 60,
-                                    alignment: Alignment.centerLeft,
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Text(
-                                        "${item.barcode!} | ${item.itemCode!}\n${item.itemName}",
-                                        overflow: TextOverflow.visible,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],

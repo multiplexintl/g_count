@@ -1,11 +1,8 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:g_count/controllers/admin_controller.dart';
 import 'package:g_count/controllers/count_controller.dart';
-import 'package:g_count/models/count_user.dart';
 import 'package:g_count/models/item.dart';
-import 'package:g_count/routes.dart';
 import 'package:get/get.dart';
 
 import '../db/db_helper.dart';
@@ -22,6 +19,7 @@ class ItemsController extends GetxController {
   TextEditingController codeController = TextEditingController();
   TextEditingController barcodeController = TextEditingController();
   TextEditingController nameController = TextEditingController();
+  var searchController = TextEditingController().obs;
 
   @override
   void onInit() async {
@@ -58,11 +56,19 @@ class ItemsController extends GetxController {
 
   // Search
 
-  Future<void> search(String searchTerm) async {
+  Future<void> search() async {
     log(selectedItems.length.toString());
-    viewItems = searchItems(searchTerm.toLowerCase());
+    // if (selectedBrand == null || selectedBrand == "") {
+    //   log("message");
+    // }
+    viewItems = searchItems(searchController.value.text.toLowerCase());
     log(viewItems.length.toString());
     update();
+  }
+
+  Future<void> clear() async {
+    searchController.value.text =
+        searchController.value.text.replaceAll('^', '');
   }
 
   List<Item> searchItems(String searchTerm) {

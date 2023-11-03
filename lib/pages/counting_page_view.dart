@@ -146,7 +146,7 @@ class ByCodeWidget extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(15)),
+              borderRadius: const BorderRadius.all(Radius.circular(13)),
               color: Colors.deepOrange.shade100,
             ),
             height: 170,
@@ -422,7 +422,7 @@ class IndividualWidget extends StatelessWidget {
           shape: BoxShape.rectangle,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(15)),
+              borderRadius: const BorderRadius.all(Radius.circular(13)),
               color: Colors.amber.shade100,
             ),
             padding: const EdgeInsets.all(8),
@@ -690,7 +690,7 @@ class LastItemWidget extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 5),
         child: Wrap(
           children: [
             if (countItem != null)
@@ -748,7 +748,7 @@ class ContinuesWidget extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(15)),
+              borderRadius: const BorderRadius.all(Radius.circular(13)),
               color: Colors.green.shade100,
             ),
             height: 120,
@@ -976,7 +976,8 @@ class CommonTableWdiget extends StatelessWidget {
                 ),
                 if (con.scannedBarcodes.isEmpty)
                   const Expanded(child: Center(child: Text("No Items Yet"))),
-                Expanded(
+                SizedBox(
+                  height: 205,
                   child: ListView.builder(
                     itemCount: con.scannedBarcodes.length,
                     itemBuilder: (context, index) {

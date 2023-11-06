@@ -17,7 +17,7 @@ class CountingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //  int selectedIndex = -1;
-    var countCon = Get.put(CountController());
+    var con = Get.put(CountController());
     // InputWithKeyboardControlFocusNode barcodeFocusNode =
     //     InputWithKeyboardControlFocusNode();
     FocusNode barcodeFocusNode = FocusNode();
@@ -29,7 +29,9 @@ class CountingPage extends StatelessWidget {
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: WillPopScope(
         onWillPop: () async {
-          return true;
+          // need to check is temp table is empty or not
+          // if empty go back if not empty go to home
+          return con.goBack();
         },
         child: Scaffold(
           appBar: CustomWidgets.customAppBar("Start Counting", back: true),
@@ -42,10 +44,10 @@ class CountingPage extends StatelessWidget {
             ),
             child: ButtonRowWidget(
               onPressedClear: () async {
-                await countCon.clearCount();
+                await con.clearCount();
               },
               onPressedUpdate: () async {
-                await countCon.updateTempCount();
+                await con.updateTempCount();
               },
             ),
           ),
@@ -53,7 +55,7 @@ class CountingPage extends StatelessWidget {
             padding: const EdgeInsets.only(left: 14, right: 14, top: 5),
             child: DefaultTabController(
               length: 3,
-              initialIndex: countCon.itemFromSearch != null ? 1 : 0,
+              initialIndex: con.itemFromSearch != null ? 1 : 0,
               child: Column(
                 children: [
                   ButtonsTabBar(
@@ -101,15 +103,15 @@ class CountingPage extends StatelessWidget {
                       child: TabBarView(
                     children: [
                       ContinuesWidget(
-                        con: countCon,
+                        con: con,
                         continuesBarcodeFocusNode: continuesBarcodeFocusNode,
                       ),
                       IndividualWidget(
-                        con: countCon,
+                        con: con,
                         barcodeFocusNode: barcodeFocusNode,
                       ),
                       ByCodeWidget(
-                        con: countCon,
+                        con: con,
                         qtyFocusNode: byCodeQtyFocusNode,
                       )
                     ],

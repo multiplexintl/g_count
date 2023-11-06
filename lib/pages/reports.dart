@@ -223,7 +223,9 @@ class RowDropWidget extends StatelessWidget {
     return DropdownButtonHideUnderline(
       child: DropdownButtonFormField(
         padding: EdgeInsets.zero,
-        decoration: CustomWidgets().dropDownInputDecoration(labelText: title),
+        decoration: CustomWidgets()
+            .dropDownInputDecoration(labelText: title)
+            .copyWith(),
         value: dropdownvalue,
         items: items,
         onChanged: onChanged,

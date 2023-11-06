@@ -26,9 +26,13 @@ class ReportController extends GetxController {
   String? selectedUser;
   @override
   void onInit() {
+    getReport();
+    super.onInit();
+  }
+
+  Future<void> getReport() async {
     getSummeryReport();
     getItems();
-    super.onInit();
   }
 
   void clearAll() async {
@@ -46,10 +50,6 @@ class ReportController extends GetxController {
     pageController.jumpToPage(val);
     // pageController.animateToPage(val,
     //     duration: const Duration(microseconds: 100), curve: Curves.bounceIn);
-  }
-
-  Future<void> initilaPage() async {
-    pageController.jumpToPage(selectedRadio.value);
   }
 
   Future<void> getSummeryReport() async {

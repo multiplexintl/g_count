@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:g_count/controllers/admin_controller.dart';
 import 'package:g_count/controllers/count_controller.dart';
 import 'package:g_count/controllers/dashboard_controller.dart';
+import 'package:g_count/controllers/delete_count_controller.dart';
 import 'package:g_count/controllers/items_controller.dart';
 import 'package:g_count/controllers/report_controller.dart';
 
@@ -23,7 +24,8 @@ class HomePage extends StatelessWidget {
     var countCon = Get.put(CountController());
     Get.put(ItemsController());
     var adminCon = Get.find<AdminController>();
-    var con = Get.put(ReportController());
+    var repCon = Get.put(ReportController());
+    Get.put(DeleteCountController());
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
     return Scaffold(
       appBar: CustomWidgets.customAppBar("gCount"),
@@ -67,10 +69,9 @@ class HomePage extends StatelessWidget {
                 asset: "assets/icons/report.png",
                 title: "Reports",
                 onTap: () {
-                  // con
-                  //     .initilaPage()
-                  //     .then((value) =>
-                  Get.toNamed(RouteLinks.reports);
+                  repCon
+                      .getReport()
+                      .then((value) => Get.toNamed(RouteLinks.reports));
                 },
               ),
               HomeWidget(
@@ -91,7 +92,9 @@ class HomePage extends StatelessWidget {
               HomeWidget(
                 asset: "assets/icons/utilities.png",
                 title: "Utilities",
-                onTap: () async {},
+                onTap: () async {
+                  Get.toNamed(RouteLinks.deleteCount);
+                },
               ),
               HomeWidget(
                 asset: "assets/icons/admin.png",

@@ -491,25 +491,28 @@ class CountController extends GetxController {
         await DBHelper.getTableLength(tableName: DBHelper.tempCountTable);
     bool? shouldClose;
     if (tempCount <= 0) {
-      shouldClose = true;
+      Get.back();
     } else {
-      shouldClose = await CustomWidgets.customDialogue(
-        title: "Are you sure??",
-        subTitle:
-            "There are items counted. If you go back, this will be cleared. This is not reversible!!!",
-        onPressed: () async {
-          var result =
-              await DBHelper.deleteAllItem(tableName: DBHelper.tempCountTable);
-          if (result != -1) {
-            scannedBarcodes.clear();
-            await getSumOfQty();
-          }
-          Get.back(result: true);
-        },
-        onPressedBack: () => Get.back(result: false),
-      );
+      Get.back();
+      Get.back();
+
+      // shouldClose = await CustomWidgets.customDialogue(
+      //   title: "Are you sure??",
+      //   subTitle:
+      //       "There are items counted. If you go back, this will be cleared. This is not reversible!!!",
+      //   onPressed: () async {
+      //     var result =
+      //         await DBHelper.deleteAllItem(tableName: DBHelper.tempCountTable);
+      //     if (result != -1) {
+      //       scannedBarcodes.clear();
+      //       await getSumOfQty();
+      //     }
+      //     Get.back(result: true);
+      //   },
+      //   onPressedBack: () => Get.back(result: false),
+      // );
     }
-    return shouldClose!;
+    return true;
   }
 
   // update counts to temp count
@@ -552,8 +555,16 @@ class CountController extends GetxController {
     GROUP BY ${DBHelper.partCodeTempCount};''';
     var toPhyDetail = await DBHelper.getItemsByRawQuery(query);
     log(toPhyDetail.toString());
-    var result2 = await DBHelper.bulkInsert(
-        tableName: DBHelper.phyDetailTable, items: toPhyDetail);
+    // here update/insert phyqty count.
+    var result3 =
+        await DBHelper.getAllItems(tableName: DBHelper.phyDetailTable);
+    log(result3.toString());
+
+    var result2 = await DBHelper.bulkInsertOrUpdate(
+        tableName: DBHelper.phyDetailTable,
+        conditionColumn: DBHelper.partCodePhyDetail,
+        newDataList: toPhyDetail);
+    log(result2.toString());
     var phyDetailsTable =
         await DBHelper.getAllItems(tableName: DBHelper.phyDetailTable);
     log(phyDetailsTable.toString());
@@ -573,6 +584,7 @@ class CountController extends GetxController {
         textColor: Colors.green,
       );
     } else {
+      Get.back();
       CustomWidgets.customSnackBar(
         title: "Not Updated",
         message:

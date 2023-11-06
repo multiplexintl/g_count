@@ -4,6 +4,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:g_count/models/dashboard.dart';
+import 'package:g_count/widgets/custom_widgets.dart';
 import 'package:get/get.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 
@@ -123,22 +124,51 @@ class DashBoardController extends GetxController {
   }
 
   Future<void> sync() async {
-    isSyncing.value = true;
+    if (countSetting.countId != null) {
+      isSyncing.value = true;
+      update();
+      List<bool> finalResults = await synchronousSyncFunction();
+      if (finalResults.every((element) => true)) {
+        // get updated count
+        await getUpdatedQty();
+        CustomWidgets.customSnackBar(
+            title: "Updated",
+            message: "Items updated to server",
+            textColor: Colors.green);
+      } else {
+        CustomWidgets.customSnackBar(
+            title: "Not Updated",
+            message: "Items not updated to server",
+            textColor: Colors.red);
+      }
+    } else {
+      await createDashboard().then((value) => sync());
+    }
+    isSyncing.value = false;
+    update();
+  }
+
+  Future<List<bool>> synchronousSyncFunction() async {
     log("sync called");
     String formattedDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
-    var finalQuery =
-        '''SELECT ct.${DBHelper.countIDCountSettings} AS CountID, pd.${DBHelper.partCodePhyDetail} AS ItCode, 
-    ct.${DBHelper.machIDCountSettings} AS MachId, SUM(pd.${DBHelper.qtyPhyDetail}) AS Qty 
-    FROM ${DBHelper.countSettingsTable} ct
-    INNER JOIN ${DBHelper.phyDetailTable} pd
-    GROUP BY pd.${DBHelper.partCodePhyDetail};''';
-    var result2 = await DBHelper.getItemsByRawQuery(finalQuery);
-    result2 = result2.map(
+    var result3 =
+        await DBHelper.getAllItems(tableName: DBHelper.phyDetailTable);
+    log(result3.toString());
+    var result2 = result3.map(
       (e) {
-        return {...e, "Dt": formattedDate};
+        return {
+          "CountID": countSetting.countId,
+          "ItCode": e['PartCode'],
+          "MachId": countSetting.machId,
+          "Qty": e['Qty'],
+          "Dt": formattedDate,
+        };
       },
     ).toList();
     var toUpload = {"PhyDetailsData": result2};
+
+    log(toUpload.toString());
+
     var tempCountBack =
         await DBHelper.getAllItems(tableName: DBHelper.tempCountBackTable);
     tempCountBack = tempCountBack.map((e) {
@@ -160,56 +190,44 @@ class DashBoardController extends GetxController {
       DashboardRepo().uploadPhyDetails(toUpload),
       DashboardRepo().uploadTempCountBack(tempCountToUpload)
     ]);
-    if (finalResults.every((element) => true)) {
-      // get updated count
-      await getUpdatedQty();
-      Get.snackbar(
-        "Updated",
-        "Items updated to server",
-        backgroundColor: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        colorText: Colors.green,
-        duration: const Duration(seconds: 6),
-      );
-    }
-    isSyncing.value = false;
+    return finalResults;
   }
 
-  void synchronousSyncFunction() async {
-    log("auto sync called");
-    String formattedDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
-    var finalQuery =
-        '''SELECT ct.${DBHelper.countIDCountSettings} AS CountID, pd.${DBHelper.partCodePhyDetail} AS ItCode, 
-    ct.${DBHelper.machIDCountSettings} AS MachId, SUM(pd.${DBHelper.qtyPhyDetail}) AS Qty 
-    FROM ${DBHelper.countSettingsTable} ct
-    INNER JOIN ${DBHelper.phyDetailTable} pd
-    GROUP BY pd.${DBHelper.partCodePhyDetail};''';
-    var result2 = await DBHelper.getItemsByRawQuery(finalQuery);
-    result2 = result2.map(
-      (e) {
-        return {...e, "Dt": formattedDate};
-      },
-    ).toList();
-    var toUpload = {"PhyDetailsData": result2};
-    var tempCountBack =
-        await DBHelper.getAllItems(tableName: DBHelper.tempCountBackTable);
-    tempCountBack = tempCountBack.map((e) {
-      return {
-        "CountID": countSetting.countId,
-        "SNo": e['SNo'],
-        "ItCode": e["PartCode"],
-        "Barcode": e['Barcode'],
-        "Qty": e['Qty'],
-        "RackNo": e['RackNo'],
-        "UserCode": e['UserCode'],
-        "MachId": countSetting.machId,
-        "Dt": formattedDate,
-      };
-    }).toList();
-    var tempCountToUpload = {"TempCountBackData": tempCountBack};
-    DashboardRepo().uploadPhyDetails(toUpload);
-    DashboardRepo().uploadTempCountBack(tempCountToUpload);
-  }
+  // void synchronousSyncFunction() async {
+  //   log("auto sync called");
+  //   String formattedDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+  //   var finalQuery =
+  //       '''SELECT ct.${DBHelper.countIDCountSettings} AS CountID, pd.${DBHelper.partCodePhyDetail} AS ItCode,
+  //   ct.${DBHelper.machIDCountSettings} AS MachId, SUM(pd.${DBHelper.qtyPhyDetail}) AS Qty
+  //   FROM ${DBHelper.countSettingsTable} ct
+  //   INNER JOIN ${DBHelper.phyDetailTable} pd
+  //   GROUP BY pd.${DBHelper.partCodePhyDetail};''';
+  //   var result2 = await DBHelper.getItemsByRawQuery(finalQuery);
+  //   result2 = result2.map(
+  //     (e) {
+  //       return {...e, "Dt": formattedDate};
+  //     },
+  //   ).toList();
+  //   var toUpload = {"PhyDetailsData": result2};
+  //   var tempCountBack =
+  //       await DBHelper.getAllItems(tableName: DBHelper.tempCountBackTable);
+  //   tempCountBack = tempCountBack.map((e) {
+  //     return {
+  //       "CountID": countSetting.countId,
+  //       "SNo": e['SNo'],
+  //       "ItCode": e["PartCode"],
+  //       "Barcode": e['Barcode'],
+  //       "Qty": e['Qty'],
+  //       "RackNo": e['RackNo'],
+  //       "UserCode": e['UserCode'],
+  //       "MachId": countSetting.machId,
+  //       "Dt": formattedDate,
+  //     };
+  //   }).toList();
+  //   var tempCountToUpload = {"TempCountBackData": tempCountBack};
+  //   DashboardRepo().uploadPhyDetails(toUpload);
+  //   DashboardRepo().uploadTempCountBack(tempCountToUpload);
+  // }
 
   Future<void> checkInternetConnection() async {
     final bool isConnected = await InternetConnectionChecker().hasConnection;

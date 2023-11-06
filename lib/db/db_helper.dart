@@ -151,7 +151,7 @@ class DBHelper {
 
     // PhyDetail table
     await database.execute("""CREATE TABLE $phyDetailTable(
-      $partCodePhyDetail TEXT NOT NULL,
+      $partCodePhyDetail TEXT PRIMARY KEY,
       $qtyPhyDetail INTEGER NOT NULL)""");
 
     // Rack table
@@ -250,6 +250,55 @@ class DBHelper {
         }
       }
     });
+    return result;
+  }
+
+  static Future<List<Object?>> bulkInsertOrUpdate({
+    required String tableName,
+    required String conditionColumn,
+    required List<Map<String, dynamic>> newDataList,
+  }) async {
+    Database database = await db;
+    var result = [];
+    try {
+      await database.transaction((txn) async {
+        Batch batch = txn.batch();
+        for (var newData in newDataList) {
+          // Check if the condition exists in the table
+          log(newData.toString());
+          String query =
+              "SELECT * FROM $tableName WHERE $conditionColumn = ?', [${newData[conditionColumn]}]";
+          log(query);
+          List<Map<String, dynamic>> result = await txn.rawQuery(
+              'SELECT * FROM $tableName WHERE $conditionColumn = ?',
+              [newData[conditionColumn]]);
+
+          log(result.toString());
+
+          if (result.isNotEmpty) {
+            // Condition exists, update the record
+            batch.update(
+              tableName,
+              {'Qty': result[0]['Qty'] + newData['Qty']},
+              where: '$conditionColumn = ?',
+              whereArgs: [newData[conditionColumn]],
+            );
+          } else {
+            // Condition does not exist, insert a new record
+            batch.insert(
+              tableName,
+              newData,
+            );
+          }
+        }
+        result = await batch.commit(noResult: false);
+      });
+    } catch (e) {
+      // Handle exceptions
+      log('Error in bulkInsertOrUpdate: $e');
+      result = [];
+    }
+    log(result.toString());
     return result;
   }
 

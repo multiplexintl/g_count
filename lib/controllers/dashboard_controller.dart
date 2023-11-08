@@ -24,9 +24,9 @@ class DashBoardController extends GetxController {
   void onInit() async {
     await createDashboard().then((value) {
       if (countSetting.countId != null && countSetting.stat != "Completed") {
-        timer = Timer.periodic(const Duration(minutes: 5), (Timer t) {
-          log(t.tick.toString());
-          // synchronousSyncFunction();
+        timer = Timer.periodic(const Duration(minutes: 15), (Timer t) {
+          log("auto sync called for ${t.tick} times");
+          synchronousSyncFunction();
         });
       }
     });

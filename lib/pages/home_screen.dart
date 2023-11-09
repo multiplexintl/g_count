@@ -93,7 +93,7 @@ class HomePage extends StatelessWidget {
                 asset: "assets/icons/utilities.png",
                 title: "Utilities",
                 onTap: () async {
-                  Get.toNamed(RouteLinks.deleteCount);
+                  //   Get.toNamed(RouteLinks.deleteCount);
                 },
               ),
               HomeWidget(
@@ -115,7 +115,7 @@ class HomePage extends StatelessWidget {
                           }
                         });
                   } else {
-                    Get.toNamed(RouteLinks.admin);
+                    //Get.toNamed(RouteLinks.admin);
                   }
                 },
               ),

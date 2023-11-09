@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:one_clock/one_clock.dart';
 import 'package:overlay_loading_progress/overlay_loading_progress.dart';
 
 import '../controllers/home_controller.dart';

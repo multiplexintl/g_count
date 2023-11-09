@@ -127,45 +127,60 @@ class AdminPage extends StatelessWidget {
                 },
               ),
               // Obx(() => Center(child: Text("${con.addingItem}")))
-              Obx(() => Column(
-                    children: [
-                      Text(
-                        "Status",
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      CustomWidgets.gap(h: 20),
-                      statusWidget(
-                        context: context,
-                        value: con.connection.value,
-                        title: "Internet Connection : ",
-                      ),
-                      statusWidget(
-                        context: context,
-                        value: con.settingsImport.value,
-                        title: "Settings imported : ",
-                      ),
-                      statusWidget(
-                        context: context,
-                        value: con.itemsImport.value,
-                        title: "Items imported : ",
-                      ),
-                      // statusWidget(
-                      //   context: context,
-                      //   value: con.countExport.value,
-                      //   title: "Export Count : ",
-                      // ),
-                      // statusWidget(
-                      //   context: context,
-                      //   value: con.countFinalize.value,
-                      //   title: "Count Finalized : ",
-                      // ),
-                      // statusWidget(
-                      //   context: context,
-                      //   value: con.databaseCleared.value,
-                      //   title: "Database Cleared : ",
-                      // ),
-                    ],
-                  ))
+              Obx(
+                () => Column(
+                  children: [
+                    Text(
+                      "Status",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    CustomWidgets.gap(h: 20),
+                    statusWidget(
+                      context: context,
+                      value: con.connection.value,
+                      title: "Internet Connection : ",
+                    ),
+                    statusWidget(
+                      context: context,
+                      value: con.settingsImport.value,
+                      title: "Settings imported : ",
+                    ),
+                    statusWidget(
+                      context: context,
+                      value: con.itemsImport.value,
+                      title: "Items imported : ",
+                    ),
+                    // statusWidget(
+                    //   context: context,
+                    //   value: con.countExport.value,
+                    //   title: "Export Count : ",
+                    // ),
+                    // statusWidget(
+                    //   context: context,
+                    //   value: con.countFinalize.value,
+                    //   title: "Count Finalized : ",
+                    // ),
+                    // statusWidget(
+                    //   context: context,
+                    //   value: con.databaseCleared.value,
+                    //   title: "Database Cleared : ",
+                    // ),
+                  ],
+                ),
+              ),
+              Obx(() => GestureDetector(
+                    onDoubleTap: () {
+                      log("message");
+                      con.showId.toggle();
+                    },
+                    child: Container(
+                      height: 50,
+                      width: con.showId.value ? 150 : 50,
+                      color: Colors.transparent,
+                      child: Text(
+                          con.showId.value ? con.uniqueIdentifier.value : ""),
+                    ),
+                  )),
             ],
           ),
         ),

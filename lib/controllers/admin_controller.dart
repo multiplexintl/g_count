@@ -17,7 +17,8 @@ import 'package:unique_identifier/unique_identifier.dart';
 import '../routes.dart';
 
 class AdminController extends GetxController {
-  String _identifier = 'Unknown';
+  var uniqueIdentifier = 'Unknown'.obs;
+  var showId = false.obs;
 
   var connection = false.obs;
   var settingsImport = false.obs;
@@ -44,7 +45,7 @@ class AdminController extends GetxController {
     } on PlatformException {
       identifier = 'Failed to get Unique Identifier';
     }
-    _identifier = identifier;
+    uniqueIdentifier.value = identifier;
   }
 
   Future<void> getStatus() async {
@@ -71,8 +72,8 @@ class AdminController extends GetxController {
   }
 
   Future<void> importSettings() async {
-    log(_identifier);
-    var result = await AdminRepo().getCountSettings(_identifier);
+    log(uniqueIdentifier.value);
+    var result = await AdminRepo().getCountSettings(uniqueIdentifier.value);
     result.fold(
       (error) {
         log(error);

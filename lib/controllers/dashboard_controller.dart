@@ -66,11 +66,13 @@ class DashBoardController extends GetxController {
         await DBHelper.getAllItems(tableName: DBHelper.countSettingsTable);
     List<CountSetting> countSettings =
         settingsFromDB.map((e) => CountSetting.fromJson(e)).toList();
-    countSetting = countSettings.first;
-    var usersFromDB =
-        await DBHelper.getAllItems(tableName: DBHelper.usersTable);
-    users = usersFromDB.map((e) => UserMaster.fromJson(e)).toList();
-    partLength = await DBHelper.getTableLength(tableName: DBHelper.partTable);
+    if (countSettings.isNotEmpty) {
+      countSetting = countSettings.first;
+      var usersFromDB =
+          await DBHelper.getAllItems(tableName: DBHelper.usersTable);
+      users = usersFromDB.map((e) => UserMaster.fromJson(e)).toList();
+      partLength = await DBHelper.getTableLength(tableName: DBHelper.partTable);
+    }
   }
 
   Future<void> setDashBoard() async {
@@ -155,47 +157,49 @@ class DashBoardController extends GetxController {
   }
 
   Future<List<bool>> synchronousSyncFunction() async {
-    log("sync called");
-    String formattedDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
-    var result3 =
-        await DBHelper.getAllItems(tableName: DBHelper.phyDetailTable);
-    log(result3.toString());
-    var result2 = result3.map(
-      (e) {
+    List<bool> finalResults = [];
+    if (countSetting.countId != null && countSetting.stat != "Completed") {
+      log("sync called");
+      String formattedDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+      var result3 =
+          await DBHelper.getAllItems(tableName: DBHelper.phyDetailTable);
+      log(result3.toString());
+      var result2 = result3.map(
+        (e) {
+          return {
+            "CountID": countSetting.countId,
+            "ItCode": e['PartCode'],
+            "MachId": countSetting.machId,
+            "Qty": e['Qty'],
+            "Dt": formattedDate,
+          };
+        },
+      ).toList();
+      var toUpload = {"PhyDetailsData": result2};
+
+      log(toUpload.toString());
+
+      var tempCountBack =
+          await DBHelper.getAllItems(tableName: DBHelper.tempCountBackTable);
+      tempCountBack = tempCountBack.map((e) {
         return {
           "CountID": countSetting.countId,
-          "ItCode": e['PartCode'],
-          "MachId": countSetting.machId,
+          "SNo": e['SNo'],
+          "ItCode": e["PartCode"],
+          "Barcode": e['Barcode'],
           "Qty": e['Qty'],
+          "RackNo": e['RackNo'],
+          "UserCode": e['UserCode'],
+          "MachId": countSetting.machId,
           "Dt": formattedDate,
         };
-      },
-    ).toList();
-    var toUpload = {"PhyDetailsData": result2};
-
-    log(toUpload.toString());
-
-    var tempCountBack =
-        await DBHelper.getAllItems(tableName: DBHelper.tempCountBackTable);
-    tempCountBack = tempCountBack.map((e) {
-      return {
-        "CountID": countSetting.countId,
-        "SNo": e['SNo'],
-        "ItCode": e["PartCode"],
-        "Barcode": e['Barcode'],
-        "Qty": e['Qty'],
-        "RackNo": e['RackNo'],
-        "UserCode": e['UserCode'],
-        "MachId": countSetting.machId,
-        "Dt": formattedDate,
-      };
-    }).toList();
-    var tempCountToUpload = {"TempCountBackData": tempCountBack};
-
-    var finalResults = await Future.wait<bool>([
-      DashboardRepo().uploadPhyDetails(toUpload),
-      DashboardRepo().uploadTempCountBack(tempCountToUpload)
-    ]);
+      }).toList();
+      var tempCountToUpload = {"TempCountBackData": tempCountBack};
+      finalResults = await Future.wait<bool>([
+        DashboardRepo().uploadPhyDetails(toUpload),
+        DashboardRepo().uploadTempCountBack(tempCountToUpload)
+      ]);
+    }
     return finalResults;
   }
 

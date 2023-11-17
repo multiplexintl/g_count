@@ -348,16 +348,27 @@ class AdminController extends GetxController {
   Future<void> finalizeCount() async {
     var result = await DashboardRepo().getUpdatedQty(
         dashCon.countSetting.countId!, dashCon.countSetting.machId!);
+    log(result.toString());
+    var tempCountBaclLength = await DBHelper.getSumofColumn(
+        tableName: DBHelper.tempCountBackTable,
+        columnName: DBHelper.qtyTempCountBack);
+    var phyDetailsLength = await DBHelper.getSumofColumn(
+        tableName: DBHelper.phyDetailTable, columnName: DBHelper.qtyPhyDetail);
+
     result.fold((l) {
       log("Error");
-    }, (r) async {
-      if (r.phyDetailQty == r.tempCountQty) {
+    }, (count) async {
+      bool allEqual = count.phyDetailQty == phyDetailsLength &&
+          phyDetailsLength == tempCountBaclLength &&
+          tempCountBaclLength == count.tempCountQty;
+      log(allEqual.toString());
+
+      if (allEqual) {
         log("equal");
         // if equal update server variables
         dashCon.countSetting.stat = "Completed";
         log(dashCon.countSetting.toString());
         var result2 = await DashboardRepo().finalizeCount(dashCon.countSetting);
-
         if (result2) {
           // update count setting in variable and database
           var res = await DBHelper.updateItem(
@@ -378,7 +389,7 @@ class AdminController extends GetxController {
         } else {
           CustomWidgets.customSnackBar(
             title: "Failed",
-            message: "Count Not Finalized.",
+            message: "Count Not Finalized. Try Again",
             textColor: Colors.red,
           );
         }

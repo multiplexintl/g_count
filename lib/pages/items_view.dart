@@ -18,7 +18,7 @@ class ItemsView extends StatelessWidget {
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         appBar: CustomWidgets.customAppBar("Items", back: true),
-        //  resizeToAvoidBottomInset: true,
+        // resizeToAvoidBottomInset: false,
         bottomNavigationBar: Container(
             color: Colors.blue,
             alignment: Alignment.center,
@@ -27,16 +27,18 @@ class ItemsView extends StatelessWidget {
               builder: (con) {
                 return Text(
                   "No. Selected Items: ${con.selectedItems.length}",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.merge(const TextStyle(fontWeight: FontWeight.w500)),
+                  style: Theme.of(context).textTheme.titleLarge?.merge(
+                        const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
                 );
               },
             )),
         body: Padding(
           padding:
-              const EdgeInsets.only(left: 14, right: 14, top: 20, bottom: 0),
+              const EdgeInsets.only(left: 14, right: 14, top: 10, bottom: 0),
           child: Column(
             children: [
               //brand row
@@ -157,34 +159,36 @@ class ItemsView extends StatelessWidget {
                       ],
                     ),
                   ),
-                  CustomWidgets.gap(w: 10),
+                  CustomWidgets.gap(w: 5),
                   SizedBox(
                     height: 36,
                     width: 80,
-                    child: OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                          backgroundColor: Colors.greenAccent,
-                          fixedSize: const Size(100, 48)),
-                      onPressed: () {
-                        CustomWidgets.customDialogue(
-                          title: "Are you sure?",
-                          subTitle:
-                              "You have selected ${con.selectedItem.value.barcode} | ${con.selectedItem.value.itemName} | ${con.selectedItem.value.brand}",
-                          onPressed: () {
-                            Get.back();
-                            con.gotoCount();
-                          },
-                        );
-                      },
-                      child: const Icon(
-                        Icons.forward,
-                        color: Colors.white,
-                      ),
-                    ),
+                    child: Obx(() => OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                              backgroundColor: Colors.greenAccent,
+                              fixedSize: const Size(100, 48)),
+                          onPressed: con.selectedItem.value.itemCode == null
+                              ? () {}
+                              : () {
+                                  CustomWidgets.customDialogue(
+                                    title: "Are you sure?",
+                                    subTitle:
+                                        "You have selected ${con.selectedItem.value.barcode} | ${con.selectedItem.value.itemName} | ${con.selectedItem.value.brand}",
+                                    onPressed: () {
+                                      Get.back();
+                                      con.gotoCount();
+                                    },
+                                  );
+                                },
+                          child: const Icon(
+                            Icons.forward,
+                            color: Colors.white,
+                          ),
+                        )),
                   ),
                 ],
               ),
-              CustomWidgets.gap(h: 10),
+              CustomWidgets.gap(h: 20),
               GetBuilder<ItemsController>(
                 builder: (con) {
                   return CommonTableWdiget(
@@ -206,6 +210,7 @@ class ItemsView extends StatelessWidget {
                             return TextFormField(
                               controller: con.searchController.value,
                               enabled: con.selectedItems.isNotEmpty,
+                              style: Theme.of(context).textTheme.bodyMedium,
                               validator: (value) {
                                 return value == null || value.isEmpty
                                     ? ""
@@ -214,6 +219,9 @@ class ItemsView extends StatelessWidget {
                               onChanged: (value) {
                                 if (value.contains('^')) {
                                   con.clear();
+                                }
+                                if (value.isEmpty) {
+                                  con.getItemsByBrand(con.selectedBrand!);
                                 }
                               },
                               onEditingComplete: () {
@@ -225,10 +233,9 @@ class ItemsView extends StatelessWidget {
                               decoration: CustomWidgets()
                                   .dropDownInputDecoration()
                                   .copyWith(
-                                      contentPadding: const EdgeInsets.all(10),
-                                      errorStyle: const TextStyle(
-                                        height: 0,
-                                      )),
+                                    contentPadding: const EdgeInsets.all(10),
+                                    errorStyle: const TextStyle(height: 0),
+                                  ),
                             );
                           },
                         ),
@@ -238,7 +245,7 @@ class ItemsView extends StatelessWidget {
                   CustomWidgets.gap(w: 15),
                   SizedBox(
                       height: 36,
-                      width: 80,
+                      width: 100,
                       child: GetBuilder<ItemsController>(
                         builder: (con) {
                           return OutlinedButton(
@@ -341,8 +348,9 @@ class CommonTableWdiget extends StatelessWidget {
                     bottomRight: Radius.circular(15),
                   ),
                   child: SizedBox(
-                    height: 263,
+                    height: 250,
                     child: ListView.builder(
+                      shrinkWrap: true,
                       itemCount: items.length,
                       itemBuilder: (context, index) {
                         var item = items[index];

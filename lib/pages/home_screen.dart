@@ -106,9 +106,12 @@ class HomePage extends StatelessWidget {
                         formKey: formKey,
                         otp: dashBoardCon.countSetting.otp!,
                         content: "Enter Initialization OTP.",
+                       
+                        con: dashBoardCon,
                         onPressedOk: () async {
                           if (formKey.currentState!.validate()) {
                             FocusManager.instance.primaryFocus?.unfocus();
+                            dashBoardCon.obscureOTP.value = true;
                             Get.back();
                             adminCon.setSettings().then((value) =>
                                 Get.toNamed(RouteLinks.admin, arguments: true));

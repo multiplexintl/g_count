@@ -65,39 +65,46 @@ class CountController extends GetxController {
       individualtextEditingController.value.text = itemFromSearch!.barcode!;
       lastItem = itemFromSearch;
     }
+    var settingsFromDB =
+        await DBHelper.getAllItems(tableName: DBHelper.countSettingsTable);
+    List<CountSetting> countSettings =
+        settingsFromDB.map((e) => CountSetting.fromJson(e)).toList();
+    countSetting = countSettings.first;
 
-    int tempLength =
-        await DBHelper.getTableLength(tableName: DBHelper.tempCountTable);
-    if (tempLength <= 0) {
-      var settingsFromDB =
-          await DBHelper.getAllItems(tableName: DBHelper.countSettingsTable);
-      List<CountSetting> countSettings =
-          settingsFromDB.map((e) => CountSetting.fromJson(e)).toList();
-      countSetting = countSettings.first;
-      var usersFromDB =
-          await DBHelper.getAllItems(tableName: DBHelper.usersTable);
-      users = usersFromDB.map((e) => UserMaster.fromJson(e)).toList();
-      var rackFromDB =
-          await DBHelper.getAllItems(tableName: DBHelper.rackTable);
-      rackMaster = rackFromDB.map((e) => RackMaster.fromJson(e)).toList();
-      countUser = CountUser();
-      rackNumberController.value.text = "";
-      rack.clear();
-      bayNo.clear();
-      levelNo.clear();
-      Get.toNamed(RouteLinks.count);
+    if (countSetting.stat != "Completed") {
+      int tempLength =
+          await DBHelper.getTableLength(tableName: DBHelper.tempCountTable);
+      if (tempLength <= 0) {
+        var usersFromDB =
+            await DBHelper.getAllItems(tableName: DBHelper.usersTable);
+        users = usersFromDB.map((e) => UserMaster.fromJson(e)).toList();
+        var rackFromDB =
+            await DBHelper.getAllItems(tableName: DBHelper.rackTable);
+        rackMaster = rackFromDB.map((e) => RackMaster.fromJson(e)).toList();
+        countUser = CountUser();
+        rackNumberController.value.text = "";
+        rack.clear();
+        bayNo.clear();
+        levelNo.clear();
+        Get.toNamed(RouteLinks.count);
+      } else {
+        // log(countUserFromDB.toString());
+        var countUserFromDB =
+            await DBHelper.getAllItems(tableName: DBHelper.countUserTable);
+        countUser = countUserFromDB
+            .map((json) => CountUser.fromJson(json))
+            .toList()
+            .first;
+        await getCountItems();
+        await getItems();
+        log(countUser.toJson().toString());
+        Get.toNamed(RouteLinks.counting);
+      }
     } else {
-      // log(countUserFromDB.toString());
-      var countUserFromDB =
-          await DBHelper.getAllItems(tableName: DBHelper.countUserTable);
-      countUser = countUserFromDB
-          .map((json) => CountUser.fromJson(json))
-          .toList()
-          .first;
-      await getCountItems();
-      await getItems();
-      log(countUser.toJson().toString());
-      Get.toNamed(RouteLinks.counting);
+      CustomWidgets.customSnackBar(
+          title: "Count Finalized",
+          message: "The Count is already finalized.",
+          textColor: Colors.red);
     }
   }
 

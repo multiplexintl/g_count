@@ -3,6 +3,7 @@ class DashBoard {
   String? locCode;
   String? locName;
   String? machID;
+  String? status;
   bool? connection;
   int? countID;
   String? countInCharge;
@@ -16,6 +17,7 @@ class DashBoard {
     this.locCode,
     this.locName,
     this.machID,
+    this.status,
     this.connection,
     this.countID,
     this.countInCharge,
@@ -31,6 +33,7 @@ class DashBoard {
         'countDate: $countDate, '
         'locCode: $locCode, '
         'locName: $locName, '
+        'status : $status, '
         'machID: $machID, '
         'connection: $connection, '
         'countID: $countID, '

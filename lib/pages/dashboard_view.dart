@@ -30,6 +30,10 @@ class DashBoardPage extends StatelessWidget {
               title: "Location",
               value: "${con.dashBoard.value.locName}",
             ),
+            DashboardWidget(
+              title: "Status",
+              value: "${con.dashBoard.value.status}",
+            ),
             CustomWidgets.gap(
               h: 15,
             ),
@@ -111,7 +115,8 @@ class DashBoardPage extends StatelessWidget {
                   return ElevatedButton(
                     onPressed: con.isSyncing.value
                         ? () {}
-                        : con.dashBoard.value.connection != true
+                        : con.dashBoard.value.connection != true ||
+                                con.countSetting.stat == "Completed"
                             ? null
                             : () {
                                 con.sync();

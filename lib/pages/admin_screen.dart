@@ -96,19 +96,20 @@ class AdminPage extends StatelessWidget {
                   con.checkTempCountAndFinalizeCount().then(
                     (value) {
                       if (value) {
-                        if (con.countSetting.countId != null) {
-                          log(con.countSetting.toString());
+                        if (con.dashCon.countSetting.countId != null) {
+                          log(con.dashCon.countSetting.toString());
                           CustomWidgets.displayTextInputDialog(
                               formKey: formKey,
-                              otp: con.countSetting.finalOtp!,
+                              otp: con.dashCon.countSetting.finalOtp!,
                               content:
                                   "Are you sure you want to finalize count?\nThis is NOT REVERSIBLE!!!",
+                              con: con.dashCon,
                               onPressedOk: () async {
                                 if (formKey.currentState!.validate()) {
                                   FocusManager.instance.primaryFocus?.unfocus();
                                   Get.back();
                                   CustomWidgets.startLoading(context);
-                                  con.checkTempCountAndFinalizeCount();
+                                  con.finalizeCount();
                                 }
                               });
                         }
@@ -157,7 +158,7 @@ class AdminPage extends StatelessWidget {
                     // ),
                     // statusWidget(
                     //   context: context,
-                    //   value: con.countFinalize.value,
+                    //   value: con.dashCon.countSetting.stat == "Completed",
                     //   title: "Count Finalized : ",
                     // ),
                     // statusWidget(

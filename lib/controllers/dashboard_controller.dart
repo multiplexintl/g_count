@@ -19,12 +19,13 @@ class DashBoardController extends GetxController {
   Timer? timer;
 
   var isSyncing = false.obs;
+  var obscureOTP = true.obs;
 
   @override
   void onInit() async {
     await createDashboard().then((value) {
       if (countSetting.countId != null && countSetting.stat != "Completed") {
-        timer = Timer.periodic(const Duration(minutes: 15), (Timer t) {
+        timer = Timer.periodic(const Duration(minutes: 6), (Timer t) {
           log("auto sync called for ${t.tick} times");
           synchronousSyncFunction();
         });
@@ -56,6 +57,10 @@ class DashBoardController extends GetxController {
     await setDashBoard();
   }
 
+  void toggleotp() {
+    obscureOTP.value = !obscureOTP.value;
+  }
+
   Future<void> getSettings() async {
     var settingsFromDB =
         await DBHelper.getAllItems(tableName: DBHelper.countSettingsTable);
@@ -75,6 +80,7 @@ class DashBoardController extends GetxController {
       dashBoard.value.locCode = countSetting.locCd;
       dashBoard.value.locName = countSetting.locationName;
       dashBoard.value.machID = countSetting.machId;
+      dashBoard.value.status = countSetting.stat;
       // need to check for internet connection here
       // dashBoard.value.connection = false;
       dashBoard.value.countID = countSetting.countId;

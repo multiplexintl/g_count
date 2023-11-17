@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:g_count/controllers/dashboard_controller.dart';
 import 'package:get/get.dart';
 import 'package:overlay_loading_progress/overlay_loading_progress.dart';
 
@@ -151,6 +154,7 @@ class CustomWidgets {
     required String content,
     required void Function()? onPressedOk,
     required GlobalKey<FormState> formKey,
+    required DashBoardController con,
   }) async {
     return Get.dialog(AlertDialog(
       title: const Center(child: Text('Enter OTP')),
@@ -161,24 +165,35 @@ class CustomWidgets {
           CustomWidgets.gap(h: 15),
           Form(
             key: formKey,
-            child: TextFormField(
-              // controller: _textFieldController,
-              keyboardType: TextInputType.number,
-              autovalidateMode: AutovalidateMode.disabled,
-              validator: (value) {
-                if (value == null) {
-                  return "Enter OTP";
-                } else if (value != otp.toString()) {
-                  return "Enter Valid OTP";
-                }
-                // validated
-                return null;
-              },
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: "OTP",
-              ),
-            ),
+            child: Obx(() => TextFormField(
+                  // controller: _textFieldController,
+                  keyboardType: TextInputType.number,
+                  autovalidateMode: AutovalidateMode.disabled,
+                  obscureText: con.obscureOTP.value,
+                  validator: (value) {
+                    if (value == null) {
+                      return "Enter OTP";
+                    } else if (value != otp.toString()) {
+                      return "Enter Valid OTP";
+                    }
+                    // validated
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: "OTP",
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        con.toggleotp();
+                      },
+                      icon: Icon(
+                        con.obscureOTP.value
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
+                    ),
+                  ),
+                )),
           ),
         ],
       ),
@@ -364,7 +379,7 @@ class BottomBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 60,
+      height: 40,
       width: double.infinity,
       color: Colors.blue,
       child: Row(

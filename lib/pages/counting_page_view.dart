@@ -696,7 +696,7 @@ class LastItemWidget extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5),
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Wrap(
           children: [
             if (countItem != null)
@@ -990,7 +990,7 @@ class CommonTableWdiget extends StatelessWidget {
                     bottomRight: Radius.circular(15),
                   ),
                   child: SizedBox(
-                    height: isSmall == true ? 215 : 255,
+                    height: isSmall == true ? 172 : 215,
                     child: ListView.builder(
                       itemCount: con.scannedBarcodes.length,
                       itemBuilder: (context, index) {
@@ -1079,9 +1079,9 @@ class CommonTableWdiget extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(
-            height: 3,
-          )
+          // const SizedBox(
+          //   height: 3,
+          // )
         ],
       ),
     );

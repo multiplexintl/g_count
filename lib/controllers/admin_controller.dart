@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:g_count/controllers/dashboard_controller.dart';
 import 'package:g_count/widgets/custom_widgets.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
@@ -27,7 +28,8 @@ class AdminController extends GetxController {
   var countFinalize = false.obs;
   var databaseCleared = false.obs;
 
-  CountSetting countSetting = CountSetting();
+  //CountSetting dashCon.countSetting = CountSetting();
+  var dashCon = Get.put(DashBoardController());
   List<UserMaster> users = [];
   List<RackMaster> rack = [];
 
@@ -55,7 +57,7 @@ class AdminController extends GetxController {
       log(settingsFromDB.toString());
       List<CountSetting> countSettings =
           settingsFromDB.map((e) => CountSetting.fromJson(e)).toList();
-      countSetting = countSettings.first;
+      dashCon.countSetting = countSettings.first;
       settingsImport.value = true;
     } else {
       settingsImport.value = false;
@@ -94,6 +96,7 @@ class AdminController extends GetxController {
           var addtoSettings = await DBHelper.bulkInsert(
               tableName: DBHelper.countSettingsTable,
               items: countSettingToTable!);
+          dashCon.countSetting = settings.countSettings!.first;
           log(addtoSettings.toString());
           //  log(settings.userMaster.toString());
           var deleteUsers =
@@ -140,7 +143,7 @@ class AdminController extends GetxController {
     log(settingsFromDB.toString());
     List<CountSetting> countSettings =
         settingsFromDB.map((e) => CountSetting.fromJson(e)).toList();
-    countSetting = countSettings.first;
+    dashCon.countSetting = countSettings.first;
     settingsImport.value = true;
     var usersFromDB =
         await DBHelper.getAllItems(tableName: DBHelper.usersTable);
@@ -152,8 +155,8 @@ class AdminController extends GetxController {
   }
 
   Future<void> importItems() async {
-    if (countSetting.countId != null) {
-      var result = await AdminRepo().getitems(countSetting.countId!);
+    if (dashCon.countSetting.countId != null) {
+      var result = await AdminRepo().getitems(dashCon.countSetting.countId!);
       result.fold(
         (error) {
           log(error);
@@ -285,7 +288,9 @@ class AdminController extends GetxController {
   }
 
   void exportCount() async {
-    log("auto sync called");
+    log(dashCon.countSetting.stat.toString());
+
+    log("export called");
     String formattedDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
     var finalQuery =
         '''SELECT ct.${DBHelper.countIDCountSettings} AS CountID, pd.${DBHelper.partCodePhyDetail} AS ItCode, 
@@ -304,14 +309,14 @@ class AdminController extends GetxController {
         await DBHelper.getAllItems(tableName: DBHelper.tempCountBackTable);
     tempCountBack = tempCountBack.map((e) {
       return {
-        "CountID": countSetting.countId,
+        "CountID": dashCon.countSetting.countId,
         "SNo": e['SNo'],
         "ItCode": e["PartCode"],
         "Barcode": e['Barcode'],
         "Qty": e['Qty'],
         "RackNo": e['RackNo'],
         "UserCode": e['UserCode'],
-        "MachId": countSetting.machId,
+        "MachId": dashCon.countSetting.machId,
         "Dt": formattedDate,
       };
     }).toList();
@@ -320,7 +325,8 @@ class AdminController extends GetxController {
       DashboardRepo().uploadPhyDetails(toUpload),
       DashboardRepo().uploadTempCountBack(tempCountToUpload),
     ]);
-    if (result.any((element) => false)) {
+    log(result.toString());
+    if (result.any((element) => element == false)) {
       log("not updated");
       CustomWidgets.customSnackBar(
         title: "Failed",
@@ -340,29 +346,42 @@ class AdminController extends GetxController {
   }
 
   Future<void> finalizeCount() async {
-    var result = await DashboardRepo()
-        .getUpdatedQty(countSetting.countId!, countSetting.machId!);
+    var result = await DashboardRepo().getUpdatedQty(
+        dashCon.countSetting.countId!, dashCon.countSetting.machId!);
     result.fold((l) {
       log("Error");
     }, (r) async {
       if (r.phyDetailQty == r.tempCountQty) {
         log("equal");
-        // update count setting in variable and database
-        countSetting.stat = "Completed";
-        var res = await DBHelper.updateItem(
-          tableName: DBHelper.countSettingsTable,
-          data: countSetting.toJson(),
-          keyColumn: DBHelper.countIDCountSettings,
-          condition: countSetting.countId.toString(),
-        );
-        countFinalize.value = true;
-        log(res.toString());
-        Get.offAllNamed(RouteLinks.admin);
-        CustomWidgets.customSnackBar(
-          title: "Success",
-          message: "The Physical Count and Temp Count Back is equal.",
-          textColor: Colors.green,
-        );
+        // if equal update server variables
+        dashCon.countSetting.stat = "Completed";
+        log(dashCon.countSetting.toString());
+        var result2 = await DashboardRepo().finalizeCount(dashCon.countSetting);
+
+        if (result2) {
+          // update count setting in variable and database
+          var res = await DBHelper.updateItem(
+            tableName: DBHelper.countSettingsTable,
+            data: dashCon.countSetting.toJson(),
+            keyColumn: DBHelper.countIDCountSettings,
+            condition: dashCon.countSetting.countId.toString(),
+          );
+          countFinalize.value = true;
+          log(res.toString());
+          // Get.offAllNamed(RouteLinks.admin);
+          CustomWidgets.customSnackBar(
+            title: "Success",
+            message:
+                "The Physical Count and Temp Count Back is equal. Count Finalized.",
+            textColor: Colors.green,
+          );
+        } else {
+          CustomWidgets.customSnackBar(
+            title: "Failed",
+            message: "Count Not Finalized.",
+            textColor: Colors.red,
+          );
+        }
       } else {
         log("not equal");
         CustomWidgets.customSnackBar(
@@ -371,8 +390,8 @@ class AdminController extends GetxController {
           textColor: Colors.red,
         );
       }
+      CustomWidgets.stopLoader();
     });
-    CustomWidgets.stopLoader();
     update();
   }
 

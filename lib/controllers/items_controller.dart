@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:g_count/controllers/count_controller.dart';
 import 'package:g_count/models/item.dart';
+import 'package:g_count/widgets/custom_widgets.dart';
 import 'package:get/get.dart';
 
 import '../db/db_helper.dart';
@@ -51,19 +52,28 @@ class ItemsController extends GetxController {
     selectedItems =
         totalItems.where((element) => element.brand == brand).toList();
     viewItems = selectedItems;
+    selectedItem.value = Item();
     update();
   }
 
   // Search
 
   Future<void> search() async {
+    selectedItem.value = Item();
+    codeController.clear();
+    barcodeController.clear();
+    nameController.clear();
     log(selectedItems.length.toString());
-    // if (selectedBrand == null || selectedBrand == "") {
-    //   log("message");
-    // }
-    viewItems = searchItems(searchController.value.text.toLowerCase());
-    log(viewItems.length.toString());
-    update();
+    if (selectedBrand == null || selectedBrand == "") {
+      CustomWidgets.customSnackBar(
+          title: "No Brand",
+          message: "Please select a brand first",
+          textColor: Colors.red);
+    } else {
+      viewItems = searchItems(searchController.value.text.toLowerCase());
+      log(viewItems.length.toString());
+      update();
+    }
   }
 
   Future<void> clear() async {
@@ -73,7 +83,6 @@ class ItemsController extends GetxController {
 
   List<Item> searchItems(String searchTerm) {
     List<String> searchTerms = searchTerm.toLowerCase().split(' ');
-
     return selectedItems.where((item) {
       // Check if all search terms are present in any of the fields
       return searchTerms.every((term) =>

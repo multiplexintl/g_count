@@ -57,4 +57,21 @@ class AdminRepo {
       return Left(e.toString());
     }
   }
+
+  // check API connection
+  Future<bool> checkAPIConnection(String uniqueId) async {
+    final Uri url = Uri.parse('${_url}gCount/GetMasters?UnitID=$uniqueId');
+    final client = http.Client();
+    try {
+      final response = await client.get(url);
+      log(response.statusCode.toString());
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
 }

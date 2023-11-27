@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:g_count/controllers/admin_controller.dart';
 import 'package:g_count/models/dashboard.dart';
 import 'package:g_count/widgets/custom_widgets.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,7 @@ import 'package:intl/intl.dart';
 import '../db/db_helper.dart';
 import '../models/settings/count_setting.dart';
 import '../models/settings/user_master.dart';
+import '../repositories/admin_repo.dart';
 import '../repositories/dashboard_repo.dart';
 
 class DashBoardController extends GetxController {
@@ -38,6 +40,8 @@ class DashBoardController extends GetxController {
   CountSetting countSetting = CountSetting();
   List<UserMaster> users = [];
   int partLength = 0;
+  var connection = false.obs;
+  var apiConnection = false.obs;
 
   final InternetConnectionChecker customInstance =
       InternetConnectionChecker.createInstance(
@@ -251,17 +255,27 @@ class DashBoardController extends GetxController {
         switch (status) {
           case InternetConnectionStatus.connected:
             dashBoard.value.connection = true;
+            connection.value = true;
+            checkAPIConnection();
             log('Data connection is available.');
-            update();
+          //update();
           // break;
           case InternetConnectionStatus.disconnected:
             dashBoard.value.connection = false;
-            update();
+            connection.value = false;
+            apiConnection.value = false;
+            // update();
             log('You are disconnected from the internet.');
           //  break;
         }
       },
     );
+  }
+
+  Future<void> checkAPIConnection() async {
+    apiConnection.value = await AdminRepo()
+        .checkAPIConnection(AdminController().uniqueIdentifier.value);
+    //update();
   }
 
   String getFormattedDate(String string) {

@@ -170,6 +170,7 @@ class CustomWidgets {
                   keyboardType: TextInputType.number,
                   autovalidateMode: AutovalidateMode.disabled,
                   obscureText: con.obscureOTP.value,
+                  autofocus: true,
                   validator: (value) {
                     if (value == null) {
                       return "Enter OTP";

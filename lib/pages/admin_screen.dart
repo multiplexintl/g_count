@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:g_count/controllers/admin_controller.dart';
+import 'package:g_count/controllers/dashboard_controller.dart';
 import 'package:g_count/widgets/custom_widgets.dart';
 import 'package:get/get.dart';
 import 'package:icons_plus/icons_plus.dart';
@@ -12,6 +13,7 @@ class AdminPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var con = Get.find<AdminController>();
+    var dashCon = Get.find<DashBoardController>();
     bool? isBack = Get.arguments;
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
     return Scaffold(
@@ -138,8 +140,13 @@ class AdminPage extends StatelessWidget {
                     CustomWidgets.gap(h: 20),
                     statusWidget(
                       context: context,
-                      value: con.connection.value,
+                      value: dashCon.connection.value,
                       title: "Internet Connection : ",
+                    ),
+                    statusWidget(
+                      context: context,
+                      value: dashCon.apiConnection.value,
+                      title: "API Connection : ",
                     ),
                     statusWidget(
                       context: context,

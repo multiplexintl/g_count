@@ -21,7 +21,6 @@ class AdminController extends GetxController {
   var uniqueIdentifier = 'Unknown'.obs;
   var showId = false.obs;
 
-  var connection = false.obs;
   var settingsImport = false.obs;
   var itemsImport = false.obs;
   var countExport = false.obs;
@@ -67,10 +66,15 @@ class AdminController extends GetxController {
     checkInternetConnection();
   }
 
-  Future<bool> checkInternetConnection() async {
+  Future<void> checkInternetConnection() async {
     final bool isConnected = await InternetConnectionChecker().hasConnection;
-    connection.value = isConnected;
-    return isConnected;
+    dashCon.connection.value = isConnected;
+    checkAPIConnection();
+  }
+
+  Future<void> checkAPIConnection() async {
+    dashCon.apiConnection.value =
+        await AdminRepo().checkAPIConnection(uniqueIdentifier.value);
   }
 
   Future<void> importSettings() async {
@@ -123,7 +127,7 @@ class AdminController extends GetxController {
             duration: 4,
           );
         } else {
-          log("This Mobile is not authorized to perform this action.");
+          log("This Device is not authorized to perform this action.");
           CustomWidgets.stopLoader();
           CustomWidgets.customSnackBar(
             title: "Failed",

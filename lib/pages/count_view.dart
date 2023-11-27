@@ -1,8 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:g_count/controllers/count_controller.dart';
 import 'package:g_count/models/settings/user_master.dart';
 import 'package:g_count/widgets/custom_widgets.dart';
 import 'package:get/get.dart';
+
+import '../widgets/text_with_controller.dart';
 
 class CountPage extends StatelessWidget {
   const CountPage({super.key});
@@ -10,6 +14,8 @@ class CountPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var con = Get.find<CountController>();
+    final InputWithKeyboardControlFocusNode rackFocusNode =
+        InputWithKeyboardControlFocusNode();
 
     return Scaffold(
       appBar: CustomWidgets.customAppBar("Count", back: true),
@@ -108,10 +114,26 @@ class CountPage extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       )),
                 ),
-                Obx(() => TextFormField(
-                      enabled: false,
+                // Obx(
+                //   () => TextFormField(
+                //     controller: con.rackNumberController.value,
+                //     onChanged: (value) {
+                //       log(value);
+                //     },
+                //     decoration: CustomWidgets().dropDownInputDecoration(),
+                //   ),
+                // ),
+                Obx(() => InputWithKeyboardControl(
                       controller: con.rackNumberController.value,
-                      decoration: CustomWidgets().dropDownInputDecoration(),
+                      focusNode: rackFocusNode,
+                      width: 300,
+                      showButton: false,
+                      startShowKeyboard: false,
+                      style: Theme.of(context).textTheme.bodyMedium!,
+                      autofocus: true,
+                      onChanged: (p0) {
+                        con.onRackScanned(rackNumber: p0);
+                      },
                     )),
                 CustomWidgets.gap(h: 15),
                 Row(
@@ -134,11 +156,13 @@ class CountPage extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                           ),
-                          onPressed: con.rackNumberController.value.text.isEmpty
-                              ? null
-                              : () {
-                                  con.createCountUser();
-                                },
+                          onPressed:
+                              con.rackNumberController.value.text.isEmpty ||
+                                      con.countUser.user == null
+                                  ? null
+                                  : () {
+                                      con.createCountUser();
+                                    },
                           child: const Text("Start"),
                         );
                       },

@@ -78,14 +78,17 @@ class CountController extends GetxController {
         var usersFromDB =
             await DBHelper.getAllItems(tableName: DBHelper.usersTable);
         users = usersFromDB.map((e) => UserMaster.fromJson(e)).toList();
+        users.sort((a, b) => a.userName!.compareTo(b.userName!));
         var rackFromDB =
             await DBHelper.getAllItems(tableName: DBHelper.rackTable);
         rackMaster = rackFromDB.map((e) => RackMaster.fromJson(e)).toList();
         countUser = CountUser();
         rackNumberController.value.text = "";
         rack.clear();
+        rack = rackMaster.map((e) => e.rackNo!).toSet().toList();
         bayNo.clear();
         levelNo.clear();
+        update();
         Get.toNamed(RouteLinks.count);
       } else {
         // log(countUserFromDB.toString());
@@ -178,6 +181,55 @@ class CountController extends GetxController {
     rackNumberController.value.text =
         "${countUser.rack}-${countUser.bay}-${countUser.level}";
     update();
+  }
+
+  void onRackScanned({required String rackNumber}) {
+    rackNumberController.value.clear();
+    log(rackNumber);
+    String cleanedRackNumber = rackNumber.replaceAll('^', '');
+    countUser.rack = null;
+    countUser.bay = null;
+    countUser.level = null;
+    update();
+    List<String> parts = cleanedRackNumber.split('-');
+    if (parts.length != 3) {
+      log("Invalid barcode format");
+      return;
+    }
+    String scannedRack = parts[0];
+    String scannedBay = parts[1];
+    String scannedLevel = parts[2];
+    rack = rackMaster.map((e) => e.rackNo!).toSet().toList();
+    log(rack.toString());
+    bayNo = rackMaster
+        .where((rackMaster) => rackMaster.rackNo == scannedRack)
+        .map((rackMaster) => rackMaster.bayNo)
+        .toSet()
+        .toList();
+    log(bayNo.toString());
+    levelNo = rackMaster
+        .where((rackMaster) =>
+            rackMaster.rackNo == scannedRack && rackMaster.bayNo == scannedBay)
+        .map((rackMaster) => rackMaster.levelNo)
+        .toSet()
+        .toList();
+    log(levelNo.toString());
+
+    if (rack.isNotEmpty && bayNo.isNotEmpty && levelNo.isNotEmpty) {
+      log("$scannedRack-$scannedBay-$scannedLevel is a valid rack");
+      countUser.rack = scannedRack;
+      countUser.bay = scannedBay;
+      countUser.level = scannedLevel;
+      rackNumberController.value.text = cleanedRackNumber;
+      update();
+    } else {
+      log("$scannedRack-$scannedBay-$scannedLevel is not a valid rack.");
+      CustomWidgets.customSnackBar(
+        title: "Invalid Rack!!!",
+        message: "The scanned code is invalid.",
+        textColor: Colors.red,
+      );
+    }
   }
 
   void createCountUser() async {

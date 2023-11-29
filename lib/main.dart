@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:g_count/controllers/admin_controller.dart';
+import 'package:g_count/controllers/permission_controller.dart';
 import 'package:g_count/routes.dart';
 import 'package:get/get.dart';
 import 'package:global_configuration/global_configuration.dart';
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       builder: (context, child) {
+        // Get.put(PermissionController());
         Get.put(AdminController());
         // Get.put(HomeController());
         // Get.put(DashBoardController());
@@ -33,6 +35,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
-

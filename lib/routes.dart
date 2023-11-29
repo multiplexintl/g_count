@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:g_count/pages/settings/backup.dart';
 import '/pages/admin_screen.dart';
 import '/pages/count_view.dart';
 import '/pages/dashboard_view.dart';
@@ -9,6 +10,7 @@ import '/pages/reports.dart';
 import 'package:get/get.dart';
 
 import 'pages/counting_page_view.dart';
+import 'pages/settings/settings_screen.dart';
 import 'pages/splash_screen.dart';
 
 class RouteGenerator {
@@ -76,6 +78,20 @@ class RouteGenerator {
       curve: Curves.easeIn,
       transitionDuration: const Duration(seconds: 1),
     ),
+    GetPage(
+      name: RouteLinks.settings,
+      page: () => const SettingsScreen(),
+      transition: Transition.cupertino,
+      curve: Curves.easeIn,
+      transitionDuration: const Duration(seconds: 1),
+    ),
+    GetPage(
+      name: RouteLinks.backup,
+      page: () => const BackupWidget(),
+      transition: Transition.cupertino,
+      curve: Curves.easeIn,
+      transitionDuration: const Duration(seconds: 1),
+    ),
   ];
 }
 
@@ -89,4 +105,6 @@ class RouteLinks {
   static const String count = "/CountPage";
   static const String counting = "/CountingPage";
   static const String deleteCount = "/DeleteCount";
+  static const String settings = "/SettingsScreen";
+  static const String backup = "/BackupScreen";
 }

@@ -86,7 +86,7 @@ class HomePage extends StatelessWidget {
                 asset: "assets/icons/settings.png",
                 title: "Settings",
                 onTap: () async {
-                  // countCon.soundAndVibrate(error: true);
+                  Get.toNamed(RouteLinks.settings);
                 },
               ),
               HomeWidget(
@@ -106,7 +106,6 @@ class HomePage extends StatelessWidget {
                         formKey: formKey,
                         otp: dashBoardCon.countSetting.otp!,
                         content: "Enter Initialization OTP.",
-                       
                         con: dashBoardCon,
                         onPressedOk: () async {
                           if (formKey.currentState!.validate()) {

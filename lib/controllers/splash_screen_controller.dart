@@ -1,6 +1,8 @@
+import 'dart:developer';
 
-
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:g_count/models/settings/count_setting.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../db/db_helper.dart';
 import '/routes.dart';
@@ -11,7 +13,7 @@ class SplashScreenController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    await getRoute();
+    await getStoragePermission().then((value) async => await getRoute());
   }
 
   Future<void> getRoute() async {
@@ -26,5 +28,18 @@ class SplashScreenController extends GetxController {
     } else {
       Get.offAndToNamed(RouteLinks.admin, arguments: false);
     }
+  }
+
+  Future<bool> getStoragePermission() async {
+    bool storagePermissionStatus;
+    final deviceInfo = await DeviceInfoPlugin().androidInfo;
+    if (deviceInfo.version.sdkInt >= 30) {
+      storagePermissionStatus =
+          await Permission.manageExternalStorage.request().isGranted;
+    } else {
+      storagePermissionStatus = await Permission.storage.request().isGranted;
+    }
+    log(storagePermissionStatus.toString());
+    return storagePermissionStatus;
   }
 }

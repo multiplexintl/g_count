@@ -1,5 +1,7 @@
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
 
@@ -96,8 +98,33 @@ class DBHelper {
     return _db!;
   }
 
+  // static Future<String> get _localPath async {
+  //   // final directory = await getApplicationDocumentsDirectory();
+  //   // return directory.path;
+  //   // To get the external path from device of download folder
+  //   final String directory = await getExternalDocumentPath();
+  //   return directory;
+  // }
+
+  // static Future<String> getExternalDocumentPath() async {
+  //   Directory directory = Directory("");
+  //   if (Platform.isAndroid) {
+  //     // Redirects it to download folder in android
+  //     directory = Directory("/storage/emulated/0/g_count_app/database");
+  //   } else {
+  //     directory = await getApplicationDocumentsDirectory();
+  //   }
+  //   final exPath = directory.path;
+  //   log("Saved Path: $exPath");
+  //   await Directory(exPath).create(recursive: true);
+  //   return exPath;
+  // }
+
   //open database
   static Future<Database> openDb() async {
+    // thsi saves the db to accessible location
+    // final databasePath = await _localPath;
+    // thsi save the db to application location
     final databasePath = await getDatabasesPath();
     final dbPath = path.join(databasePath, dbName);
     log(dbPath);

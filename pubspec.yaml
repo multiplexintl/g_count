@@ -52,6 +52,9 @@ dependencies:
   audioplayers: ^5.2.0
   vibration: ^1.8.3
   flutter_typeahead: ^4.8.0
+  path_provider: ^2.1.1
+  permission_handler: ^11.0.1
+  device_info_plus: ^9.1.1
 
 
 

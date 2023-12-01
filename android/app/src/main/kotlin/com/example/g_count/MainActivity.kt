@@ -1,4 +1,4 @@
-package com.example.g_count
+package com.multiplex.g_count
 
 import io.flutter.embedding.android.FlutterActivity
 

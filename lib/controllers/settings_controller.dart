@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as path;
 
@@ -19,6 +20,28 @@ class SettingController extends GetxController {
   List<String> fileNames = [];
   var isLoading = false.obs;
 
+  static Future<String> get _localPath async {
+    // final directory = await getApplicationDocumentsDirectory();
+    // return directory.path;
+    // To get the external path from device of download folder
+    final String directory = await getExternalDocumentPath();
+    return directory;
+  }
+
+  static Future<String> getExternalDocumentPath() async {
+    Directory directory = Directory("");
+    if (Platform.isAndroid) {
+      // Redirects it to download folder in android
+      directory = Directory("/storage/emulated/0/g_count/database/");
+    } else {
+      directory = await getApplicationDocumentsDirectory();
+    }
+    final exPath = directory.path;
+    log("Saved Path: $exPath");
+    await Directory(exPath).create(recursive: true);
+    return exPath;
+  }
+
   Future<void> createBackup() async {
     isLoading.value = true;
     try {
@@ -27,11 +50,14 @@ class SettingController extends GetxController {
       // var date = formattedDateTime.replaceAll(RegExp(r'[ ,:]'), '');
       // log(date);
       String dbName = "gCount - $formattedDateTime.db";
-      final databasePath = await getDatabasesPath();
+
+      // final databasePath = await getDatabasesPath();
+      final databasePath = await _localPath;
+
       final dbPath = path.join(databasePath, DBHelper.dbName);
       var file = File(dbPath);
       Directory documentsDirectory =
-          Directory("storage/emulated/0/g_count/Database/Backup/");
+          Directory("storage/emulated/0/g_count/database/backup/");
       final exPath = documentsDirectory.path;
       await Directory(exPath).create(recursive: true);
       String newPath = path.join('$exPath$dbName');

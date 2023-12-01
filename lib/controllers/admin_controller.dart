@@ -16,6 +16,7 @@ import 'package:get/get.dart';
 import 'package:unique_identifier/unique_identifier.dart';
 
 import '../routes.dart';
+import 'settings_controller.dart';
 
 class AdminController extends GetxController {
   var uniqueIdentifier = 'Unknown'.obs;
@@ -256,6 +257,7 @@ class AdminController extends GetxController {
       DBHelper.deleteAllItem(tableName: DBHelper.usersTable),
       DBHelper.deleteAllItem(tableName: DBHelper.countUserTable),
     ]);
+    SettingController().deleteAllFiles();
     log(result.toString());
     final finalResult = result.any((element) => element == -1);
     log(finalResult.toString());

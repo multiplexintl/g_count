@@ -22,7 +22,7 @@ import 'settings_controller.dart';
 class AdminController extends GetxController {
   var uniqueIdentifier = 'Unknown'.obs;
   var showId = false.obs;
-  String dateTime = "";
+  
   String version = "";
   String buildNumber = "";
 
@@ -60,8 +60,6 @@ class AdminController extends GetxController {
   }
 
   void versionInfo() async {
-    dateTime = DateFormat("ddMMyyyy").format(DateTime.now());
-    log(dateTime);
     PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
       version = packageInfo.version;
       buildNumber = packageInfo.buildNumber;

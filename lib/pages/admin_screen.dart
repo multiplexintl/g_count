@@ -194,7 +194,7 @@ class AdminPage extends StatelessWidget {
           Align(
             alignment: Alignment.bottomRight,
             child: Text(
-              "gCount:v${con.version} b${con.buildNumber} ${con.dateTime}",
+              "gCount:v${con.version} b${con.buildNumber} 06122023",
               style: const TextStyle(
                 fontSize: 8,
               ),

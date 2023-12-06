@@ -6,6 +6,7 @@ import 'package:g_count/controllers/dashboard_controller.dart';
 import 'package:g_count/widgets/custom_widgets.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../repositories/dashboard_repo.dart';
 import '/db/db_helper.dart';
 import '/models/settings/count_setting.dart';
@@ -21,6 +22,9 @@ import 'settings_controller.dart';
 class AdminController extends GetxController {
   var uniqueIdentifier = 'Unknown'.obs;
   var showId = false.obs;
+  String dateTime = "";
+  String version = "";
+  String buildNumber = "";
 
   var settingsImport = false.obs;
   var itemsImport = false.obs;
@@ -36,6 +40,7 @@ class AdminController extends GetxController {
   @override
   void onInit() {
     initUniqueIdentifierState();
+    versionInfo();
     getStatus();
     super.onInit();
   }
@@ -48,6 +53,21 @@ class AdminController extends GetxController {
       identifier = 'Failed to get Unique Identifier';
     }
     uniqueIdentifier.value = identifier;
+  }
+
+  void showIdToggle() async {
+    showId.toggle();
+  }
+
+  void versionInfo() async {
+    dateTime = DateFormat("ddMMyyyy").format(DateTime.now());
+    log(dateTime);
+    PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
+      version = packageInfo.version;
+      buildNumber = packageInfo.buildNumber;
+      log(version);
+      log(buildNumber);
+    });
   }
 
   Future<void> getStatus() async {
